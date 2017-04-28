@@ -8,13 +8,13 @@ load(path_to_data)
 % reguAlphaParams=[0.01,0.02];
 % kernel_params=[0.02,0.1];
 
-reguBetaParams=[0.02];
-reguAlphaParams=[0.02];
-kernel_params=[0.1];
+%reguBetaParams=[0.02];
+%reguAlphaParams=[0.02];
+%kernel_params=[0.1];
 
-% reguBetaParams=[0.01,0.02,0.04,0.08,0.1,0.2];
-% reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
-% kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
+reguBetaParams=[0.01,0.02,0.04,0.08,0.1,0.2];
+reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
+kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
 general_output=sprintf('%s/smp_%d/bs_%d/',path_to_results,nr_samples,batch_size);
 output_path=sprintf('%s/smp_%d/bs_%d/%s/',path_to_results,nr_samples,batch_size,method);
 
