@@ -1,7 +1,7 @@
-function []=USPS_experiments(method,path_to_data,path_to_results,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda)
+function []=USPS_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda)
 %USPS mat contains train,train_class,test and test_class
 %we use one vs all strategy
-addpath(genpath('/Users/irma/Documents/MATLAB/incremental_learning'))  
+addpath(genpath(path_to_code))  
 load(path_to_data)
 
 % reguBetaParams=[0.01,0.02];
