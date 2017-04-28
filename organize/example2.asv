@@ -1,0 +1,43 @@
+%Ranking on the USPS data set (9298 samples with 256 dimensions)
+clear;
+load('data/USPS.mat');
+%number of samples to use
+N=2000;
+train_percentage=70
+test_percentage=30
+
+indices=randperm(size(fea,1))
+end_training=train_percentage*size(fea,1)/100
+
+train_fea=fea(1:end_training,:)
+train_class=gns(1:end_training,:)
+
+t
+
+indices=randsample(size(fea,1),N);
+fea=fea(indices,:);
+gnd=gnd(indices);
+labels=sort(unique(gnd))
+%[R,gnd]=sparse_matrix_sample(fea,gnd,2000,200);
+%size(R)
+
+%Actively select 8 examples using MAED
+ options = [];
+ options.KernelType = 'Gaussian';
+ options.t = 0.5;
+ options.ReguBeta = 100;
+ smpRank = MAED(fea,20,options);
+
+for i = 1:length(smpRank)    
+    selected(i,:)=fea(smpRank(i),:);
+    class(i,:)=gnd(i);
+end
+selected1=full(selected);
+B=mnrfit(selected1,class,'model','nominal');
+pihat = mnrval(B,selected1,'model','nominal')
+get_accuracy(pihat,class,labels)
+%colormap('hot')
+%imagesc(pihat)
+%colorbar
+%SVMModel = fitcsvm(selected1,class)
+

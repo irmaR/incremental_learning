@@ -1,0 +1,6 @@
+function [feat,gnd]=GenTwoNoisyCircle()
+   theta=linspace(0,2*pi,300)
+   x=sin(theta)+0.75*rand(1,300)
+   y=sin(theta)+0.75*rand(1,300)
+   
+

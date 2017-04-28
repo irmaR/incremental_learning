@@ -1,0 +1,13 @@
+function [row,col]=sparse_matrix_sample(S,N)
+   %# using find
+idx = find(S);
+%# draw 4 without replacement
+out=randperm(length(idx));
+fourRandomIdx = idx(out(1:N));
+%# draw 4 with replacement
+%# get row, column values
+size(S)
+j = colperm(S)
+size(j)
+[row,col] = ind2sub(size(S),fourRandomIdx);
+
