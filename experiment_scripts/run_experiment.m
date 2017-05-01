@@ -20,6 +20,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    validation_results={};
    validation_res=zeros(length(reguAlphaParams),length(kernel_params),length(reguBetaParams));
    k=1;
+   tic
    for i=1:length(reguAlphaParams)
      for j=1:length(kernel_params)
        for b=1:length(reguBetaParams)
@@ -44,7 +45,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
              size(folds{k}.test)
           end
           performances=[];
-          tic
+          
           for k=1:length(folds)
             fprintf('Fold: %d',k)
             %increase batch size and interval for optimization
