@@ -8,6 +8,8 @@ results=[];
 
 path_to_incr=sprintf('%s/incr/auc.mat',path_to_results);
 path_to_batch=sprintf('%s/batch/auc.mat',path_to_results);
+path_to_rnd=sprintf('%s/rnd/auc.mat',path_to_results);
+
 path_to_lssvm=sprintf('%s/lssvm/auc.mat',path_to_results);
 
 counter=1;
@@ -41,9 +43,21 @@ if exist(path_to_lssvm, 'file') == 2
     report_points=load(path_to_lssvm,'report_points')
     results{counter}=aucs_lssvm;
 end
+
+if exist(path_to_rnd, 'file') == 2
+    aucs_rnd=load(path_to_rnd,'avg_aucs') 
+    avg_runtime_rnd=load(path_to_rnd,'avg_runtime')
+    std_runtime_rnd=load(path_to_rnd,'std_runtime')
+    labels{counter}='rnd';
+    report_points=load(path_to_rnd,'report_points')
+    results{counter}=aucs_rnd;
+    counter=counter+1;
+end
+
 counter=counter-1;
 fig=figure(1)
 colorVec = hsv(counter)
+results
 hold on;
 xlabel('#observations')
 ylabel('AUC-ROC')

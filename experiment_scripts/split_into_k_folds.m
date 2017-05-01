@@ -5,8 +5,6 @@ categories = unique(training_class);
 
 % Get the number of vectors belonging to each category.
 vecsPerCat = getVecsPerCat(training_data, training_class', categories);
-size(training_class)
-size(vecsPerCat)
 % Compute the fold sizes for each category.
 foldSizes = computeFoldSizes(vecsPerCat, K);
 % Randomly sort the vectors in X, then organize them by category.
