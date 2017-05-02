@@ -21,7 +21,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    validation_results={};
    validation_res=zeros(length(reguAlphaParams),length(kernel_params),length(reguBetaParams));
    k=1;
-   tic  
+   start_tuning=tic;  
    for i=1:length(reguAlphaParams)
      for j=1:length(kernel_params)
        for b=1:length(reguBetaParams)
@@ -54,30 +54,42 @@ function [results]=incremental(training_data,training_class,test_data,test_class
             end
             interval_up=interval*2;
             
-            %if strcmp(experiment_name,'batch')
+            train_batch=folds{k}.train;
+            train_batch_class=folds{k}.train_class;
+            report_points_up=[nr_samples:interval_up:size(folds{k}.train,1)-interval_up];
+            if strcmp(experiment_name,'batch') || strcmp(experiment_name,'rnd')
                %if more samples than data limit, sample data_limit data
                %points
-               train_batch=folds{k}.train;
-               train_batch_class=folds{k}.train_class;
                if size(folds{k}.train,1)>=data_limit
                    ix=randperm(data_limit);
                    [ranking,values,current_D,Kernel] = MAED(train_batch(ix,:),train_batch_class(ix,:),nr_samples,options,data_limit,warping);
                    Xs=train_batch(ix,:);
                    Ys=train_batch_class(ix,:);
+                   
                else
                    [ranking,values,current_D,Kernel] = MAED(train_batch,train_batch_class,nr_samples,options,data_limit,warping);
                    Xs=train_batch;
                    Ys=train_batch_class;
                end
-            area=run_inference(Kernel,Xs,Ys,folds{k}.test,folds{k}.test_class,options);  
-            performances(k)=area;
+               area=run_inference(Kernel,Xs,Ys,folds{k}.test,folds{k}.test_class,options);  
+               performances(k)=area;
+            else
+              [selected_points,selected_labels,list_of_selected_times,selected_kernels,list_of_dists]=MAED_experiment_instance(train_batch,train_batch_class,nr_samples,batch_size,options,report_points_up,data_limit,experiment_name,warping);
+              aucs=[];
+              for s=1:size(selected_kernels,1)
+                  area=run_inference(cell2mat(selected_kernels(s)),cell2mat(selected_points(s)),cell2mat(selected_labels(s)),folds{k}.test,folds{k}.test_class,options); 
+                  fprintf('Area %f\t',area)
+                  aucs(s)=area;
+              end
+              performances(k)=mean(aucs);
+            end
           end
           area=mean(performances);
           validation_res(i,j,b)=area;
        end
      end
    end
-   tuning_time=toc;
+   tuning_time=toc(start_tuning)
    fprintf('Performances')
    validation_res
 
@@ -101,7 +113,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    %measure time
    tic;
    [selected_points,selected_labels,list_of_selected_times,selected_kernels,list_of_dists]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,warping);
-   runtime=toc;
+   runtime=toc
    best_options=options;
    aucs=[];
    aucs_lssvm=[];
