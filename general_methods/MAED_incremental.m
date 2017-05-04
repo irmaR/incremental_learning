@@ -82,21 +82,22 @@ K = constructKernel_incremental(Dist,options);
 
 
 if isfield(options,'ReguBeta') && options.ReguBeta > 0
+   
     if isfield(options,'W')
         W = options.W;
     else
         if isfield(options,'k')
-            Woptions.k = 0;
+            Woptions.k = options.k;
         else
             Woptions.k = 0;
         end
-        %tmpD = EuDist2(original_sample(randsample(nSmp,10),:));
+
         tmpD=Dist;
         Woptions.bLDA=options.bLDA;
         Woptions.t = options.t;
-        Woptions.NeighborMode = 'Supervised' ;
+        Woptions.NeighborMode = options.NeighborMode ;
         Woptions.gnd = updated_class ;
-        Woptions.WeightMode = 'HeatKernel'  ;
+        Woptions.WeightMode = options.WeightMode  ;
         %Woptions.t = ceil(length(updated_class)/2);        
         W = constructW(updated_sample,Woptions);
     end

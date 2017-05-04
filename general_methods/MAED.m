@@ -74,16 +74,15 @@ if isfield(options,'ReguBeta') && options.ReguBeta > 0
         W = options.W;
     else
         if isfield(options,'k')
-            Woptions.k = 0;
+            Woptions.k = options.k;
         else
-            Woptions.k = 0;
+            Woptions.k = 5;
         end
 
         tmpD = Dist;
         Woptions.t = mean(mean(tmpD));
-        %Woptions.t = options.t;
         if isfield(options,'gnd')  
-          Woptions.WeightMode = 'HeatKernel'  ;
+          Woptions.WeightMode = 'HeatKernel';
           Woptions.NeighborMode='Supervised';
           Woptions.bLDA=options.bLDA;
           Woptions.gnd=options.gnd;

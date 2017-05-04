@@ -160,13 +160,11 @@ switch lower(options.WeightMode)
     case {lower('HeatKernel')}
         if ~isfield(options,'t')
             nSmp = size(fea,1);
-            %if nSmp > 3000
-            %    D = EuDist2(fea(randsample(nSmp,3000),:));
-            %else
             D = EuDist2(fea);
-            %end
             options.t = mean(mean(D));
         end
+    case {lower('balance')}
+        options.bLDA = 1;
     case {lower('Cosine')}
         bCosine = 1;
     otherwise
@@ -194,7 +192,6 @@ if strcmpi(options.NeighborMode,'Supervised')
     nLabel = length(Label);
     
     if options.bLDA
-        fprintf('here')
         G = zeros(nSmp,nSmp);
         for idx=1:nLabel
             classIdx = options.gnd==Label(idx);
@@ -211,6 +208,11 @@ if strcmpi(options.NeighborMode,'Supervised')
                 idNow = 0;
                 for i=1:nLabel
                     classIdx = find(options.gnd==Label(i));
+                    old_k=options.k;
+                    if size(classIdx,1)<=options.k %irma added !!!!!!!!!! There is a problem 
+                       options.k=0;
+                       G = zeros(nSmp*(options.k+1),3);
+                    end
                     D = EuDist2(fea(classIdx,:),[],0);
                     [dump idx] = sort(D,2); % sort each row
                     clear D dump;
@@ -222,6 +224,7 @@ if strcmpi(options.NeighborMode,'Supervised')
                     G(idNow+1:nSmpClass+idNow,3) = 1;
                     idNow = idNow+nSmpClass;
                     clear idx
+                    options.k=old_k;
                 end
                 G = sparse(G(:,1),G(:,2),G(:,3),nSmp,nSmp);
                 G = max(G,G');
@@ -246,11 +249,15 @@ if strcmpi(options.NeighborMode,'Supervised')
                 idNow = 0;
                 for i=1:nLabel
                     classIdx = find(options.gnd==Label(i));
+                    old_k=options.k;
+                    if size(classIdx,1)<=options.k %irma added !!!!!!!!!! There is a problem 
+                       options.k=0;
+                       G = zeros(nSmp*(options.k+1),3);
+                    end
                     D = EuDist2(fea(classIdx,:),[],0);
                     [dump idx] = sort(D,2); % sort each row
+                    
                     clear D;
-                    options.k
-                    idx,1:options.k+1,options.k
                     idx = idx(:,1:options.k+1);
                     dump = dump(:,1:options.k+1);
                     dump = exp(-dump/(2*options.t^2));
@@ -261,6 +268,7 @@ if strcmpi(options.NeighborMode,'Supervised')
                     G(idNow+1:nSmpClass+idNow,3) = dump(:);
                     idNow = idNow+nSmpClass;
                     clear dump idx
+                    options.k=old_k;
                 end
                 G = sparse(G(:,1),G(:,2),G(:,3),nSmp,nSmp);
             else
@@ -508,6 +516,7 @@ end
 
 switch lower(options.WeightMode)
     case {lower('Binary')}
+        
         error('Binary weight can not be used for complete graph!');
     case {lower('HeatKernel')}
         W = EuDist2(fea,[],0);
