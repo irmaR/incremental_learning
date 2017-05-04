@@ -1,6 +1,17 @@
-function []=USPS_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda)
+function []=USPS_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,k,WeightMode,NeighborMode)
 %USPS mat contains train,train_class,test and test_class
 %we use one vs all strategy
+switch nargin
+    case 11
+        NeighborModes={'Supervised'};
+        WeightModes={'HeatKernel','Cosine'}
+        ks=[0];
+    case 14
+        NeighborModes={NeighborMode};
+        WeightModes={WeightMode};
+        ks=[k];
+end
+
 addpath(genpath(path_to_code))  
 load(path_to_data)
 
@@ -8,20 +19,25 @@ load(path_to_data)
 % reguAlphaParams=[0.01,0.02];
 % kernel_params=[0.02,0.1];
 
-reguBetaParams=[0.01,0.02];
-reguAlphaParams=[0.01,0.02];
-kernel_params=[0.01,0.1];
+%reguBetaParams=[0.01,0.02];
+%reguAlphaParams=[0.01,0.02];
+%kernel_params=[0.01,0.1];
 
-% reguBetaParams=[0.01,0.02,0.04,0.08,0.1,0.2];
-% reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
-% kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
-general_output=sprintf('%s/smp_%d/bs_%d/',path_to_results,nr_samples,batch_size);
-output_path=sprintf('%s/smp_%d/bs_%d/%s/',path_to_results,nr_samples,batch_size,method);
+reguBetaParams=[0,0.01,0.02,0.04,0.08,0.1,0.2];
+reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
+kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
 
-fprintf('Making folder %s',output_path)
-mkdir(output_path)
-param_info=sprintf('%s/smp_%d/bs_%d/%s/params.txt',path_to_results,nr_samples,batch_size,method)
-fileID = fopen(param_info,'w');
+for ns=1:length(NeighborModes)
+    for ws=1:length(WeightModes)
+        for kNN=1:length(ks)
+
+    general_output=sprintf('%s/smp_%d/bs_%d/%s/%s/k_%d/',path_to_results,nr_samples,batch_size,NeighborModes{ns},WeightModes{ws},ks(kNN));
+    output_path=sprintf('%s/smp_%d/bs_%d/%s/%s/k_%d/%s/',path_to_results,nr_samples,batch_size,NeighborModes{ns},WeightModes{ws},ks(kNN),method);
+
+    fprintf('Making folder %s',output_path)
+    mkdir(output_path)
+    param_info=sprintf('%s/params.txt',output_path)
+    fileID = fopen(param_info,'w');
 
 
 fprintf(fileID,'Beta params=: ');
@@ -74,7 +90,7 @@ for r=1:length(folds)
        train_class(train_class==c)=1;
        test_class(test_class~=c)=-1;
        test_class(test_class==c)=1;
-       res1=run_experiment(train,train_class,test,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda)
+       res1=run_experiment(train,train_class,test,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda,ks(kNN),WeightModes{ws},NeighborModes{ns})
        aucs(c,:)=res1.aucs;
        tuning_time(c,:)=res1.tuning_time;
        runtime(c,:)=res1.runtime;
@@ -105,4 +121,7 @@ save(sprintf('%s/auc.mat',output_path),'avg_aucs','stdev','report_points','avg_r
 save(sprintf('%s/results.mat',output_path),'results');
 %plot the result
 plot_results(general_output,general_output)
-plot_data_imbalance(general_output,[1,2])
+%plot_data_imbalance(general_output,[1,2])
+        end
+    end
+end
