@@ -124,7 +124,7 @@ save(sprintf('%s/auc.mat',output_path),'avg_aucs','stdev','report_points','avg_r
 save(sprintf('%s/results.mat',output_path),'results');
 %plot the result
 plot_results(general_output)
-plot_data_imbalance(general_output,[1,2])
+%plot_data_imbalance(general_output,[1,2])
         end
     end
 end
