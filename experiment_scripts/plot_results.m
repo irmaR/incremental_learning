@@ -55,7 +55,7 @@ if exist(path_to_rnd, 'file') == 2
 end
 
 counter=counter-1;
-fig=figure;
+fig = figure('visible', 'off');
 colorVec = hsv(counter);
 hold on;
 xlabel('#observations')
@@ -71,5 +71,6 @@ if exist(sprintf('%s/aucs.jpg',path_to_results), 'file')==2
   delete(sprintf('%s/aucs.jpg',path_to_results));
 end
 saveas(fig,sprintf('%s/aucs.jpg',path_to_results))
+close(fig)
 clear fig
 end
