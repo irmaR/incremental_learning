@@ -1,16 +1,16 @@
-function []=USPS_experiments(method,path_to_data,path_to_results,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda)
+function []=USPS_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda)
 %USPS mat contains train,train_class,test and test_class
 %we use one vs all strategy
-addpath(genpath('/Users/irma/Documents/MATLAB/incremental_learning'))  
+addpath(genpath(path_to_code))  
 load(path_to_data)
 
 % reguBetaParams=[0.01,0.02];
 % reguAlphaParams=[0.01,0.02];
 % kernel_params=[0.02,0.1];
 
-reguBetaParams=[0.02];
-reguAlphaParams=[0.02];
-kernel_params=[0.1];
+reguBetaParams=[0.01,0.02];
+reguAlphaParams=[0.01,0.02];
+kernel_params=[0.01,0.1];
 
 % reguBetaParams=[0.01,0.02,0.04,0.08,0.1,0.2];
 % reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
@@ -47,24 +47,44 @@ fprintf(fileID,'interval:%d \n',interval);
 fprintf(fileID,'Using warping?:%d \n',warping);
 fprintf(fileID,'Using balancing?:%d \n',blda);
 
-for r=1:nr_runs
-    s = RandStream('mt19937ar','Seed',r);    
-    load(path_to_data)
-    %shuffle the training data with the seed according to the run
-    ix=randperm(s,size(train,1))';
-    %pick 60% of the data in this run to be used
-    train=train(ix(1:ceil(size(ix,1)*2/3)),:);
-    train_class=train_class(ix(1:ceil(size(ix,1)*2/3),:));
+for r=1:length(folds)
+    
+    aucs=[];
+    tuning_time=[];
+    runtime=[];
+    res=[];
+    for c=1:10
+
+    train=folds{r}.train;
+    train_class=folds{r}.train_class;
+    test=folds{r}.test;
+    test_class=folds{r}.test_class;
     
     %standardize the training and test data
     train=standardizeX(train);
     test=standardizeX(test);
+    
+    %for each category in train class we run one learning/inference
+    %procedure. We calculate AUCs and we average then
     fprintf('Number of training data points %d-%d, class %d\n',size(train,1),size(train,2),size(train_class,1));
     fprintf('Number of test data points %d-%d\n',size(test,1),size(test,2));
     report_points=[nr_samples:interval:size(train,1)-interval];
-    %we don't use validation here. We tune parameters on training data
-    %(5-fold-crossvalidation)
-    res=run_experiment(train,train_class,test,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda)
+    
+       train_class(train_class~=c)=-1;
+       train_class(train_class==c)=1;
+       test_class(test_class~=c)=-1;
+       test_class(test_class==c)=1;
+       res1=run_experiment(train,train_class,test,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda)
+       aucs(c,:)=res1.aucs;
+       tuning_time(c,:)=res1.tuning_time;
+       runtime(c,:)=res1.runtime;
+    end
+    res.aucs=mean(aucs);
+    res.stdev_aucs=std(aucs);
+    res.tuning_time=mean(tuning_time);
+    res.stdev_tuning_time=std(tuning_time);
+    res.runtime=mean(runtime);
+    res.stdev_runtime=std(runtime);
     results{r}=res;
 end
 

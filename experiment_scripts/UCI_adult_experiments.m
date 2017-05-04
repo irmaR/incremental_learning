@@ -1,26 +1,42 @@
-function []=USPS_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda)
+function []=UCI_adult_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,k,WeightMode,NeighborMode)
 %USPS mat contains train,train_class,test and test_class
 %we use one vs all strategy
+switch nargin
+    case 11
+        NeighborModes={'Supervised'};
+        WeightModes={'HeatKernel','Cosine'}
+        ks=[0];
+    case 14
+        NeighborModes={NeighborMode};
+        WeightModes={WeightMode};
+        ks=[k];
+end
+
 addpath(genpath(path_to_code))  
 load(path_to_data)
 
-reguBetaParams=[0.01,0.04,0.08,0.1,0.2];
+reguBetaParams=[0,0.01,0.04,0.08,0.1,0.2];
 reguAlphaParams=[0.01,0.04,0.2,0.3];
 kernel_params=[0.01,0.04,0.5,1,5,10];
 
-
-
-%reguBetaParams=[0.01,0.04];
+%reguBetaParams=[0,0.01,0.04];
 %reguAlphaParams=[0.01,0.04];
 %kernel_params=[0.01,0.04];
 
-general_output=sprintf('%s/smp_%d/bs_%d/',path_to_results,nr_samples,batch_size);
-output_path=sprintf('%s/smp_%d/bs_%d/%s/',path_to_results,nr_samples,batch_size,method);
+for ns=1:length(NeighborModes)
+    for ws=1:length(WeightModes)
+        for kNN=1:length(ks)
+    fprintf('%d, %s, %s\n',ks(kNN),WeightModes{ws},NeighborModes{ns})
+    if ks(kNN)==0 && strcmp(WeightModes{ws},'Binary') && strcmp(NeighborModes{ns},'kNN')
+        continue
+    end
+    general_output=sprintf('%s/smp_%d/bs_%d/%s/%s/k_%d/',path_to_results,nr_samples,batch_size,NeighborModes{ns},WeightModes{ws},ks(kNN));
+    output_path=sprintf('%s/smp_%d/bs_%d/%s/%s/k_%d/%s/',path_to_results,nr_samples,batch_size,NeighborModes{ns},WeightModes{ws},ks(kNN),method);
 
-fprintf('Making folder %s',output_path)
-mkdir(output_path)
-param_info=sprintf('%s/smp_%d/bs_%d/%s/params.txt',path_to_results,nr_samples,batch_size,method)
-fileID = fopen(param_info,'w');
+    fprintf('Making folder %s',output_path)
+    mkdir(output_path)
+    param_info=sprintf('%s/params.txt',output_path)
+    fileID = fopen(param_info,'w');
 
 
 fprintf(fileID,'Beta params=: ');
@@ -71,7 +87,7 @@ for r=1:nr_runs
     fprintf('Number of report points:%d',length(report_points))
     %we don't use validation here. We tune parameters on training data
     %(5-fold-crossvalidation)
-    res=run_experiment(train,train_class,test,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda)
+    res=run_experiment(train,train_class,test,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda,ks(kNN),WeightModes{ws},NeighborModes{ns})
     results{r}=res;
     %save intermediate results just in case
     save(sprintf('%s/results.mat',output_path),'results');
@@ -107,5 +123,8 @@ std_runtime=std(run_times);
 save(sprintf('%s/auc.mat',output_path),'avg_aucs','stdev','report_points','avg_runtime','std_runtime');
 save(sprintf('%s/results.mat',output_path),'results');
 %plot the result
-plot_results(general_output,general_output)
+plot_results(general_output)
 plot_data_imbalance(general_output,[1,2])
+        end
+    end
+end

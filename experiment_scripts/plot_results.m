@@ -1,4 +1,4 @@
-function []=plot_results(path_to_results,output)
+function []=plot_results(path_to_results)
 report_points=[];
 aucs_incr=[];
 aucs_batch=[];
@@ -55,18 +55,21 @@ if exist(path_to_rnd, 'file') == 2
 end
 
 counter=counter-1;
-fig=figure(1)
-colorVec = hsv(counter)
-results
+fig=figure;
+colorVec = hsv(counter);
 hold on;
 xlabel('#observations')
 ylabel('AUC-ROC')
 for i=1:counter
       plot(report_points.report_points,results{1,i}.avg_aucs,'LineWidth',2,'Color',colorVec(i,:))
       legendInfo{i} = [labels{i}];
-      legend(legendInfo)
-      ylim([0 1])
+      legend(legendInfo);
+      ylim([0 1]);
 end
 hold off;
+if exist(sprintf('%s/aucs.jpg',path_to_results), 'file')==2
+  delete(sprintf('%s/aucs.jpg',path_to_results));
+end
 saveas(fig,sprintf('%s/aucs.jpg',path_to_results))
+clear fig
 end

@@ -1,12 +1,11 @@
-function [results]=run_experiment(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda)
-   
+function [results]=run_experiment(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda,k,WeightMode,NeighborMode)
    switch lower(method)
        case {lower('incr')}
-          results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'incr',r,warping,blda);
+          results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'incr',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('batch')}
-          results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'batch',r,warping,blda);
+          results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'batch',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('rnd')}
-          results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'rnd',r,warping,blda);
+          results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'rnd',r,warping,blda,k,WeightMode,NeighborMode);
    end
 end
 
@@ -14,10 +13,8 @@ end
 %function [results]=select_random_sample(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,experiment_name,r,warping,blda)
     
    
-function [results]=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,experiment_name,run,warping,blda)   
+function [results]=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,experiment_name,run,warping,blda,kNN,WeightMode,NeighborMode)   
    results=[];
-   kernel = 'RBF_kernel';
-   gamma=1;
    validation_results={};
    validation_res=zeros(length(reguAlphaParams),length(kernel_params),length(reguBetaParams));
    k=1;
@@ -31,18 +28,20 @@ function [results]=incremental(training_data,training_class,test_data,test_class
           options.bLDA=blda;
           options.ReguType = 'Ridge';
           options.ReguBeta=reguBetaParams(b);
-          options.ReguAlpha = reguAlphaParams(i);      
+          options.ReguAlpha = reguAlphaParams(i);   
+          options.k=kNN;
+          options.WeightMode=WeightMode;
+          options.NeighborMode=NeighborMode;
           sprintf('Run %d, Alpha: %f, Sigma: %f',run,options.ReguAlpha,options.t)
-
           list_of_selected_data_points={};
           list_of_selected_labels={};
           list_of_kernels={};
           
-    
-          %split training data into 5 folds
+          %split training data into 5 folds for tuning the parameters
           folds=split_into_k_folds(training_data,training_class,5);
           performances=[];
           
+          %go through each fold
           for k=1:length(folds)
             fprintf('Fold: %d',k)
             %increase batch size and interval for optimization
@@ -57,24 +56,14 @@ function [results]=incremental(training_data,training_class,test_data,test_class
             train_batch=folds{k}.train;
             train_batch_class=folds{k}.train_class;
             report_points_up=[nr_samples:interval_up:size(folds{k}.train,1)-interval_up];
-            if strcmp(experiment_name,'batch') || strcmp(experiment_name,'rnd')
-               %if more samples than data limit, sample data_limit data
-               %points
-               if size(folds{k}.train,1)>=data_limit
-                   ix=randperm(data_limit);
-                   [ranking,values,current_D,Kernel] = MAED(train_batch(ix,:),train_batch_class(ix,:),nr_samples,options,data_limit,warping);
-                   Xs=train_batch(ix,:);
-                   Ys=train_batch_class(ix,:);
-                   
-               else
-                   [ranking,values,current_D,Kernel] = MAED(train_batch,train_batch_class,nr_samples,options,data_limit,warping);
-                   Xs=train_batch;
-                   Ys=train_batch_class;
-               end
-               area=run_inference(Kernel,Xs,Ys,folds{k}.test,folds{k}.test_class,options);  
-               performances(k)=area;
-            else
-              [selected_points,selected_labels,list_of_selected_times,selected_kernels,list_of_dists]=MAED_experiment_instance(train_batch,train_batch_class,nr_samples,batch_size,options,report_points_up,data_limit,experiment_name,warping);
+            
+            %shuffle the data, splitting into folds might have messed up
+            %the things and sorted the data
+            s = RandStream('mt19937ar','Seed',run);    
+            ix=randperm(s,size(train_batch,1))';
+            train_batch=train_batch(ix,:);
+            train_batch_class=train_batch_class(ix,:);
+            [selected_points,selected_labels,list_of_selected_times,selected_kernels,list_of_dists]=MAED_experiment_instance(train_batch,train_batch_class,nr_samples,batch_size,options,report_points_up,data_limit,experiment_name,warping);
               aucs=[];
               for s=1:size(selected_kernels,1)
                   area=run_inference(cell2mat(selected_kernels(s)),cell2mat(selected_points(s)),cell2mat(selected_labels(s)),folds{k}.test,folds{k}.test_class,options); 
@@ -82,7 +71,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
                   aucs(s)=area;
               end
               performances(k)=mean(aucs);
-            end
+            %end
           end
           area=mean(performances);
           validation_res(i,j,b)=area;
@@ -108,10 +97,18 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    options.t = kernel_sigma;
    options.bLDA=blda;
    options.ReguBeta=regu_beta;
-   options.ReguAlpha = reguAlpha;      
+   options.ReguAlpha = reguAlpha;   
+   options.k=kNN;
+   options.WeightMode=WeightMode;
+   options.NeighborMode=NeighborMode;
    sprintf('Run %d, Alpha: %f, Sigma: %f',run,options.ReguAlpha,options.t)
    %measure time
    tic;
+   %shuffle data
+   s = RandStream('mt19937ar','Seed',run);    
+   ix=randperm(s,size(training_data,1))';
+   training_data=training_data(ix,:);
+   training_class=training_class(ix,:);
    [selected_points,selected_labels,list_of_selected_times,selected_kernels,list_of_dists]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,warping);
    runtime=toc
    best_options=options;
@@ -119,16 +116,12 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    aucs_lssvm=[];
    for k=1:length(selected_kernels)
        Xs=cell2mat(selected_points(k));
-       size(selected_kernels(k));
-       size(Xs);
-       size(selected_labels(k));
        aucs(k)=run_inference(cell2mat(selected_kernels(k)),Xs,cell2mat(selected_labels(k)),test_data,test_class,best_options);
    end
  results.selected_points=selected_points;
  results.selected_labels=selected_labels;
  results.kernels=selected_kernels;
  results.best_options=best_options;
- results.AUC=area;
  results.validation_res=validation_res;
  results.reguAlpha=reguAlpha;
  results.reguBeta=regu_beta;
@@ -144,7 +137,16 @@ end
 
 
 function [area]=run_inference(kernel,selected_tr_points,selected_tr_labels,test_data,test_class,options)
-   option.Kernel=1;
+   %if we only have one class, return area=0
+   if length(unique(selected_tr_labels))==1
+       fprintf('only one label selected!\n')
+       unique(selected_tr_labels)
+       fprintf('\n')
+       area=0.0;
+       return
+   end
+
+   options.Kernel=1;
    options.ReguType = 'Ridge';
    options.gnd=selected_tr_labels;
    
@@ -153,7 +155,9 @@ function [area]=run_inference(kernel,selected_tr_points,selected_tr_labels,test_
        options=rmfield(options,'gnd');
        Woptions.gnd = selected_tr_labels ;
        Woptions.t = options.t;
-       Woptions.NeighborMode = 'Supervised' ;
+       Woptions.k=options.k;
+       Woptions.NeighborMode = options.NeighborMode ;
+       Woptions.WeightMode=options.WeightMode;
        W = constructW(selected_tr_points,Woptions);
        options.W=W;
        options.ReducedDim = 1;
