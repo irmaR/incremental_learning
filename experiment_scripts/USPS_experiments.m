@@ -70,12 +70,10 @@ for r=1:length(folds)
     runtime=[];
     res=[];
     for c=1:10
-
     train=folds{r}.train;
     train_class=folds{r}.train_class;
     test=folds{r}.test;
     test_class=folds{r}.test_class;
-    
     %standardize the training and test data
     train=standardizeX(train);
     test=standardizeX(test);
