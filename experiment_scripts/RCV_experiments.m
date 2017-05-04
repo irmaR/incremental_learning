@@ -14,17 +14,17 @@ end
 addpath(genpath(path_to_code))  
 load(path_to_data)
 
-reguBetaParams=[0.01,0.02];
-reguAlphaParams=[0.01,0.02];
-kernel_params=[0.02,0.1];
+%reguBetaParams=[0.01,0.02];
+%reguAlphaParams=[0.01,0.02];
+%kernel_params=[0.02,0.1];
 
 %reguBetaParams=[0,0.01,0.02];
 %reguAlphaParams=[0.01,0.02];
 %kernel_params=[0.5,0.1];
 
-%reguBetaParams=[0,0.01,0.02,0.04,0.08,0.1,0.2];
-%reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
-%kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
+reguBetaParams=[0,0.01,0.02,0.04,0.08,0.1,0.2];
+reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
+kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
 
 for ns=1:length(NeighborModes)
     for ws=1:length(WeightModes)
@@ -72,9 +72,10 @@ for ns=1:length(NeighborModes)
            train_class=folds{r}.train_class;
 
            %delete later!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-           ix=randperm(size(train,1));
-           train=train(ix(1:500),:);
-           train_class=train_class(ix(1:500),:);
+           %ix=randperm(size(train,1));
+           %train=train(ix(1:(size(train,1)/2)),:);
+           %train_class=train_class(ix(1:(size(train_class,1)/2)),:);
+           
            test=folds{r}.test;
            test_class=folds{r}.test_class;
 
