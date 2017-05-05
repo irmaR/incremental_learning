@@ -121,6 +121,13 @@ end
 switch lower(options.Method)
     case {lower('Seq')} 
         [sampleList,values] = MAEDseq(K,selectNum,splitLabel,ReguAlpha);
+        if isempty(indices_to_remove)
+           updated_sample=updated_sample(sampleList,:);
+           updated_class=updated_class(sampleList,:);
+           Dist = EuDist2(updated_sample,[],0);
+           K = constructKernel_incremental(Dist,options);
+        end
+            
     otherwise
         error('Optimization method does not exist!');
 end
