@@ -1,10 +1,10 @@
-function []=RCV_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,k,WeightMode,NeighborMode)
+function []=RCV_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,params_per_run,betas,alphas,kernels,k,WeightMode,NeighborMode)
 switch nargin
-    case 11
+    case 15
         NeighborModes={'Supervised'};
         WeightModes={'HeatKernel','Cosine'}
         ks=[0];
-    case 14
+    case 18
         NeighborModes={NeighborMode};
         WeightModes={WeightMode}
         ks=[k];
@@ -78,10 +78,6 @@ for ns=1:length(NeighborModes)
         for c=1:4
            train=folds{r}.train;
            train_class=folds{r}.train_class;
-           
-           
-
-           
            %delete later!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
            %ix=randperm(size(train,1));
 <<<<<<< HEAD
