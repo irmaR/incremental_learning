@@ -123,6 +123,13 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    validation_res=zeros(length(reguAlphaParams),length(kernel_params),length(reguBetaParams));
    k=1;
    start_tuning=tic;  
+   
+   if length(reguAlphaParams)==1 && length(kernel_params)==1 && length(reguBetaParams)==1
+      reguAlpha = reguAlphaParams(1);
+      kernel_sigma = kernel_params(1);
+      regu_beta = reguBetaParams(1);
+      tuning_time=0;
+   else
    for i=1:length(reguAlphaParams)
      for j=1:length(kernel_params)
        for b=1:length(reguBetaParams)
@@ -182,6 +189,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
        end
      end
    end
+   
    tuning_time=toc(start_tuning)
    fprintf('Performances')
    validation_res
@@ -196,6 +204,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    reguAlpha = reguAlphaParams(ic);
    kernel_sigma = kernel_params(is);
    regu_beta = reguBetaParams(is1);
+   end
    options = [];
    options.KernelType = 'Gaussian';
    options.t = kernel_sigma;

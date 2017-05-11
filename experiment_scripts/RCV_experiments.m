@@ -14,17 +14,20 @@ end
 addpath(genpath(path_to_code))  
 load(path_to_data)
 
-%reguBetaParams=[0.01,0.02];
-%reguAlphaParams=[0.01,0.02];
-%kernel_params=[0.02,0.1];
 
-%reguBetaParams=[0,0.01,0.02];
-%reguAlphaParams=[0.01,0.02];
-%kernel_params=[0.5,0.1];
+alphas_per_run=[];
+betas_per_run=[];
+kernels_per_run=[];
 
-reguBetaParams=[0,0.01,0.02,0.04,0.08,0.1,0.2];
-reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
-kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
+if params_per_run
+   alphas_per_run=alphas;
+   betas_per_run=betas;
+   kernels_per_run=kernels;
+else
+reguBetaParams=betas;
+reguAlphaParams=alphas;
+kernel_params=kernels;
+end
 
 for ns=1:length(NeighborModes)
     for ws=1:length(WeightModes)
@@ -67,10 +70,18 @@ for ns=1:length(NeighborModes)
         tuning_time=[];
         runtime=[];
         res=[];
+        if params_per_run
+            reguBetaParams=[betas_per_run(r)];
+            reguAlphaParams=[alphas_per_run(r)];
+            kernel_params=[kernels_per_run(r)];
+        end
         for c=1:4
            train=folds{r}.train;
            train_class=folds{r}.train_class;
+           
+           
 
+           
            %delete later!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
            %ix=randperm(size(train,1));
 <<<<<<< HEAD
