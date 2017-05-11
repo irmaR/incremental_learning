@@ -124,8 +124,10 @@ switch lower(options.Method)
         if isempty(indices_to_remove)
            updated_sample=updated_sample(sampleList,:);
            updated_class=updated_class(sampleList,:);
-           Dist = EuDist2(updated_sample,[],0);
-           K = constructKernel_incremental(Dist,options);
+           Dist=Dist(sampleList,sampleList);
+           K=K(sampleList,sampleList);
+           %Dist = EuDist2(updated_sample,[],0);
+           %K = constructKernel_incremental(Dist,options);
         end
             
     otherwise

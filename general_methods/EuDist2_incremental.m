@@ -26,10 +26,17 @@ function [D,augmented_sample_for_comparison,gnd] = EuDist2_incremental(original_
 %removed_data_points_ind;
 %new_data_point;
 %D;
-remaining_indices=setdiff([1:1:size(D,1)],removed_data_points_ind);
-D1=D(remaining_indices,remaining_indices);
-samples=original_samples(remaining_indices,:);
-class=original_samples_class(remaining_indices,:);
+if length(removed_data_points)>=1
+   remaining_indices=setdiff([1:1:size(D,1)],removed_data_points_ind);
+   D1=D(remaining_indices,remaining_indices);
+   samples=original_samples(remaining_indices,:);
+   class=original_samples_class(remaining_indices,:);
+else
+   samples=original_samples;
+   class=original_samples_class;
+   D1=D;
+end
+    
 augmented_sample_for_comparison=[samples;new_data_point];
 gnd=[class;new_data_point_class];
 %find Eucl. distance of new samples with remaining samples

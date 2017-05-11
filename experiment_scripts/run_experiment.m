@@ -2,15 +2,119 @@ function [results]=run_experiment(training_data,training_class,test_data,test_cl
    switch lower(method)
        case {lower('incr')}
           results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'incr',r,warping,blda,k,WeightMode,NeighborMode);
+       case {lower('incr_bal')}
+          results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'incr_bal',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('batch')}
           results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'batch',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('rnd')}
           results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'rnd',r,warping,blda,k,WeightMode,NeighborMode);
+       case {lower('lssvm')}
+          results=incremental_lssvm(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,nr_samples,interval,batch_size,report_points,data_limit,'lssvm',r);
    end
 end
 
 
-%function [results]=select_random_sample(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,experiment_name,r,warping,blda)
+function [results]=incremental_lssvm(training_data,training_class,test_data,test_class,kernel_params,gamma_params,nr_samples,interval,batch_size,report_points,data_limit,experiment_name,r)
+results=[];   
+start_tuning=tic; 
+validation_res=zeros(length(kernel_params),length(gamma_params));
+k=1;
+kernel='RBF_kernel';
+   start_tuning=tic;  
+   for i=1:length(kernel_params)
+     for j=1:length(gamma_params)
+         fprintf('HERE')
+         options.gamma=gamma_params(j);
+         options.kernel=kernel_params(i);
+         options.kernel_type=kernel;
+         folds=split_into_k_folds(training_data,training_class,5);
+                   performances=[];
+          
+           %go through each fold
+         for k=1:length(folds)
+            fprintf('Fold: %d',k)
+            %increase batch size and interval for optimization
+            increment=5;
+            if batch_size*increment>=nr_samples
+                batch_size_up=nr_samples/2;
+            else
+                batch_size_up=batch_size*increment;
+            end
+            interval_up=interval*2;
+            
+            train_batch=folds{k}.train;
+            train_batch_class=folds{k}.train_class;
+            report_points_up=[nr_samples:interval_up:size(folds{k}.train,1)-interval_up];
+            
+            %shuffle the data, splitting into folds might have messed up
+            %the things and sorted the data
+            s = RandStream('mt19937ar','Seed',run);    
+            ix=randperm(s,size(train_batch,1))';
+            train_batch=train_batch(ix,:);
+            train_batch_class=train_batch_class(ix,:);
+            [selected_points,selected_labels,~,~,~]=MAED_experiment_instance(train_batch,train_batch_class,nr_samples,batch_size,options,report_points_up,data_limit,experiment_name,warping);
+            aucs=[];
+              for s=1:size(selected_points,1)
+                  area=run_inference_lssvm(selected_points(s),folds{k}.train,folds{k}.train_class,selected_labels(s),folds{k}.test,folds{k}.test_class,options)
+                  %features   = AFEm(selected_points(s),options.kernel_type, options.kernel,X);
+                  %features_t = AFEm(selected_points(s),options.kernel_type, options.kernel,folds{k}.test);
+                  %[w,b,Yht] = ridgeregress(features,folds{k}.test_class,options.gamm,features_t);
+                  %Yht = sign(Yht);
+                  aucs(s)=area;
+              end
+              performances(k)=mean(aucs);
+            %end
+          end
+          area=mean(performances);
+          validation_res(i,j,b)=area;
+       end
+   end
+   tuning_time=toc(start_tuning)
+   fprintf('Performances')
+   %Get best options
+   [minp,ic] = max(validation_res,[],1);
+   [minminp,is] = max(minp);
+   [minmink,is1] = max(minminp);
+   ic=ic(is);
+   is=is(:,:,is1);
+   ic=ic(:,:,is1);
+   kernel = kernel_params(ic);
+   gamma = gamma_params(is);
+   options = [];
+   options.kernel_type = 'RBF_kernel';
+   options.kernel = kernel;
+   options.gamma=gamma;
+   sprintf('Run %d, kernel: %f, gamma: %f',run,options.kernel,options.gamma)
+   %measure time
+   tic;
+   %shuffle data
+   s = RandStream('mt19937ar','Seed',run);    
+   ix=randperm(s,size(training_data,1))';
+   training_data=training_data(ix,:);
+   training_class=training_class(ix,:);
+   [selected_points,selected_labels,~,~,~]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points_up,data_limit,experiment_name,warping);
+   runtime=toc
+   best_options=options;
+   aucs=[];
+   aucs_lssvm=[];
+   for k=1:length(selected_kernels)
+       Xs=cell2mat(selected_points(k));
+       aucs(k)=run_inference_lssvm(Xs,Xs,folds{k}.train_class,cell2mat(selected_labels(k)),test_data,test_class,best_options)
+   end
+ results.selected_points=selected_points;
+ results.selected_labels=selected_labels;
+ results.best_options=best_options;
+ results.validation_res=validation_res;
+ results.kernel=kernel;
+ results.gamma=gamma;
+ results.aucs=aucs;
+ results.tuning_time=tuning_time;
+ results.report_points=report_points;
+ results.test_points=test_data;
+ results.test_labels=test_class;
+ results.runtime=runtime;
+ fprintf('RESULTS')
+end
     
    
 function [results]=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,experiment_name,run,warping,blda,kNN,WeightMode,NeighborMode)   

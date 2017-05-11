@@ -1,13 +1,12 @@
-function []=UCI_adult_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,params_per_run,betas,alphas,kernels,k,WeightMode,NeighborMode)
+function []=UCI_adult_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,betas,alphas,kernels,k,WeightMode,NeighborMode)
 %USPS mat contains train,train_class,test and test_class
 %we use one vs all strategy
-nargin
 switch nargin
-    case 15
+    case 11
         NeighborModes={'Supervised'};
         WeightModes={'HeatKernel','Cosine'}
         ks=[0];
-    case 18
+    case 14
         NeighborModes={NeighborMode};
         WeightModes={WeightMode};
         ks=[k];
@@ -16,20 +15,18 @@ end
 addpath(genpath(path_to_code))  
 load(path_to_data)
 
+%reguBetaParams=[0,0.01,0.04,0.08,0.1,0.2];
+%reguAlphaParams=[0.01,0.04,0.2,0.3];
+%kernel_params=[0.01,0.04,0.5,1,5,10];
 
-alphas_per_run=[];
-betas_per_run=[];
-kernels_per_run=[];
+alphas_per_run=[0.01,0.01,0.01,0.01,0.04,0.3,0.2,0.2,0.01,0.2];
+betas_per_run=[0,0,0,0.08,0,0.2,0,0,0.2,0];
+%kernels_per_run=[0.5,0.5,0.5,0.5,0.5,0.04,10,0.01,0.5,1];
 
-if params_per_run
-   alphas_per_run=alphas;
-   betas_per_run=betas;
-   kernels_per_run=kernels;
-else
-reguBetaParams=betas;
-reguAlphaParams=alphas;
-kernel_params=kernels;
-end
+reguBetaParams=[0,0.01,0.04];
+reguAlphaParams=[0.01,0.04];
+kernel_params=[0.01,0.04,0.5,1,5];
+
 %kernel_lssvm_params=[1];
 %gamma_lssvm_params=[0.01];
 
@@ -78,11 +75,10 @@ fprintf(fileID,'Using balancing?:%d \n',blda);
 
 for r=1:nr_runs
     
-    if params_per_run
-     reguBetaParams=[betas_per_run(r)];
-     reguAlphaParams=[alphas_per_run(r)];
-     kernel_params=[kernels_per_run(r)];
-    end
+    
+    %reguBetaParams=[betas_per_run(r)];
+    %reguAlphaParams=[alphas_per_run(r)];
+    %kernel_params=[kernels_per_run(r)];
     
     
     s = RandStream('mt19937ar','Seed',r);    
