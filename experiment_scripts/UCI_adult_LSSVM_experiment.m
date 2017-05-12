@@ -4,7 +4,8 @@ function []=UCI_adult_LSSVM_experiments(method,path_to_data,path_to_results,path
 addpath(genpath(path_to_code))  
 load(path_to_data)
 
-
+general_output=sprintf('%s/smp_%d/bs_%d/',path_to_results,nr_samples,batch_size);
+output_path=sprintf('%s/smp_%d/bs_%d/%s/',path_to_results,nr_samples,batch_size,method);
 
 for r=1:nr_runs
     s = RandStream('mt19937ar','Seed',r);    
@@ -31,7 +32,8 @@ for r=1:nr_runs
     fprintf('Number of report points:%d',length(report_points))
     %we don't use validation here. We tune parameters on training data
     %(5-fold-crossvalidation)
-    res=run_experiment_LSSVM(train,train_class,test,test_class,nr_samples,interval,batch_size,report_points,method,data_limit,r)
+    res=run_experiment(train,train_class,test,test_class,[0.5],[0.01],[],nr_samples,interval,batch_size,report_points,method,data_limit,r,0,0,[],[],[])
+%res=run_experiment(train,train_class,test,test_class,nr_samples,interval,batch_size,report_points,method,data_limit,r)
     results{r}=res;
     %save intermediate results just in case
     save(sprintf('%s/results.mat',output_path),'results');
@@ -69,6 +71,5 @@ save(sprintf('%s/results.mat',output_path),'results');
 %plot the result
 plot_results(general_output)
 %plot_data_imbalance(general_output,[1,2])
-        end
-    end
 end
+
