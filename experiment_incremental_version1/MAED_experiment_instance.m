@@ -130,7 +130,7 @@ if size(new_points,1)==0
  current_D=current_D(ranking,ranking);
  
 else
-    if batch<=nr_samples
+    if batch<nr_samples
         selected_samples=train_fea_incremental(ranking,:);
         indices_to_remove=ranking((size(selected_samples,1)+1)-size(new_points,1):end,:); 
         selected_labels=train_fea_class_incremental(ranking,:);
