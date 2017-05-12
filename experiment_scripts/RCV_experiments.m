@@ -98,6 +98,8 @@ for ns=1:length(NeighborModes)
 
            train_class(train_class~=c)=-1;
            train_class(train_class==c)=1;
+           test_class(test_class~=c)=-1;
+           test_class(test_class==c)=1;
            res1=run_experiment(train,train_class,test,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda,ks(kNN),WeightModes{ws},NeighborModes{ns})
            aucs(c,:)=res1.aucs;
            selected_labels{c}=res1.selected_labels;

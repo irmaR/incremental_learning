@@ -55,10 +55,10 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
         case 'lssvm'
             train_fea_incremental=[train_fea_incremental;new_points];
             train_fea_class_incremental=[train_fea_class_incremental;new_classes];
-            Nc=nr_samples;
+            Nc=model_size;
             Xs=train_fea_incremental(1:Nc,:);
             Ys=train_fea_class_incremental(1:Nc,:);
-
+            crit_old=-inf;
             for tel=1:5*length(train_fea_incremental)
                 Xsp=Xs; Ysp=Ys;
                 S=ceil(length(train_fea_incremental)*rand(1));
@@ -66,19 +66,13 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
                 Xs(Sc,:) = train_fea_incremental(S,:);
                 Ys(Sc,:) = train_fea_class_incremental(S);
                 Ncc=Nc;
-                crit = kentropy(Xs,kernel, sigma2ent);
-  
-               if crit <= crit_old,
+                crit = kentropy(Xs,options.kernel_type, options.kernel);
+                if crit <= crit_old,
                     crit = crit_old;
                     Xs=Xsp;
                     Ys=Ysp;
                else
                     crit_old = crit;
-    % ridge regression    
-                %features   = AFEm(Xs,kernel, sigma2,X);
-                %features_t = AFEm(Xs,kernel, sigma2,Xt);
-                %[w,b,Yht] = ridgeregress(features,Y,gamma,features_t);
-                %Yht = sign(Yht);
                end    
             end
             current_sample=Xs;
