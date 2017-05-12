@@ -1,12 +1,12 @@
-function []=USPS_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,k,WeightMode,NeighborMode)
+function []=USPS_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,params_per_run,betas,alphas,kernels,k,WeightMode,NeighborMode)
 %USPS mat contains train,train_class,test and test_class
 %we use one vs all strategy
 switch nargin
-    case 11
+    case 15
         NeighborModes={'Supervised'};
         WeightModes={'HeatKernel','Cosine'}
         ks=[0];
-    case 14
+    case 18
         NeighborModes={NeighborMode};
         WeightModes={WeightMode};
         ks=[k];
@@ -14,6 +14,17 @@ end
 
 addpath(genpath(path_to_code))  
 load(path_to_data)
+
+
+if params_per_run
+   alphas_per_run=alphas;
+   betas_per_run=betas;
+   kernels_per_run=kernels;
+else
+reguBetaParams=betas;
+reguAlphaParams=alphas;
+kernel_params=kernels;
+end
 
 % reguBetaParams=[0.01,0.02];
 % reguAlphaParams=[0.01,0.02];
@@ -23,9 +34,9 @@ load(path_to_data)
 %reguAlphaParams=[0.01,0.02];
 %kernel_params=[0.01,0.1];
 
-reguBetaParams=[0,0.01,0.02,0.04,0.08,0.1,0.2];
-reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
-kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
+%reguBetaParams=[0,0.01,0.02,0.04,0.08,0.1,0.2];
+%reguAlphaParams=[0.01,0.02,0.04,0.2,0.3];
+%kernel_params=[0.01,0.02,0.04,0.5,1,3,5,10];
 
 for ns=1:length(NeighborModes)
     for ws=1:length(WeightModes)
@@ -64,7 +75,11 @@ fprintf(fileID,'Using warping?:%d \n',warping);
 fprintf(fileID,'Using balancing?:%d \n',blda);
 
 for r=1:length(folds)
-    
+    if params_per_run
+            reguBetaParams=[betas_per_run(r)];
+            reguAlphaParams=[alphas_per_run(r)];
+            kernel_params=[kernels_per_run(r)];
+    end
     aucs=[];
     tuning_time=[];
     runtime=[];

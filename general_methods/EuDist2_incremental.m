@@ -26,7 +26,7 @@ function [D,augmented_sample_for_comparison,gnd] = EuDist2_incremental(original_
 %removed_data_points_ind;
 %new_data_point;
 %D;
-if length(removed_data_points)>=1
+if length(removed_data_points_ind)>=1
    remaining_indices=setdiff([1:1:size(D,1)],removed_data_points_ind);
    D1=D(remaining_indices,remaining_indices);
    samples=original_samples(remaining_indices,:);
