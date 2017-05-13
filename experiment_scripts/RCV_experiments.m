@@ -135,7 +135,7 @@ for ns=1:length(NeighborModes)
     std_runtime=std(run_times);
     %avg_aucs_lssvm=avg_aucs_lssvm/nr_runs;
     save(sprintf('%s/auc.mat',output_path),'avg_aucs','stdev','report_points','avg_runtime','std_runtime');
-    save(sprintf('%s/results.mat',output_path),'results');
+    %save(sprintf('%s/results.mat',output_path),'results');
     %plot the result
     plot_results(general_output)
         end

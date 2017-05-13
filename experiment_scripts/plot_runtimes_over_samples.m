@@ -1,4 +1,4 @@
-function []=plot_runtimes_over_samples(path_to_results,title_text)
+function [avg_runtimes_inct,std_runtimes_inct,avg_runtimes_batch,std_runtimes_batch]=plot_runtimes_over_samples(path_to_results,title_text)
 samples=[20,40,60,80,100];
 bs=100;
 avg_runtimes_inct=[];
@@ -32,16 +32,16 @@ for i=1:length(samples)
 end
 avg_runtimes_inct
 avg_runtimes_batch
-%fig = figure('visible', 'off');
-fig = figure
+fig = figure('visible', 'off');
+%fig = figure
 colorVec = hsv(2);
 hold on;
-xlabel('#selected samples','FontSize',18)
-ylabel('Runtime (seconds)','FontSize',18)
-errorbar(samples,avg_runtimes_inct,std_runtimes_inct,'LineWidth',3,'Color',colorVec(1,:))
-errorbar(samples,avg_runtimes_batch,std_runtimes_batch,'LineWidth',3,'Color',colorVec(2,:))
+xlabel('#selected samples','FontSize',20)
+ylabel('Runtime (seconds)','FontSize',20)
+errorbar(samples,avg_runtimes_inct,std_runtimes_inct,'LineWidth',5,'Color',colorVec(1,:))
+errorbar(samples,avg_runtimes_batch,std_runtimes_batch,'LineWidth',5,'Color',colorVec(2,:))
 set(gca,'yscale','log')
-set(gca,'FontSize',18)
+set(gca,'FontSize',20)
 title(title_text)
 xlim([samples(1) samples(length(samples))]);
 legendInfo{1} = ['incr'];

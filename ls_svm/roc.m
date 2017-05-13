@@ -224,17 +224,17 @@ SE=sqrt((AREA*(1-AREA) + (NP-1)*(Q1-(AREA^2)) + (NN-1)*(Q2-(AREA^2)))/(NN*NP));
 
 
 
-if fig(1)=='f',
-  figure
-  %fill([1 FPR_ROC 0],[0 TPR_ROC 0]','b');drawnow;
-  ylim([0 1])
-  plot(FPR_ROC,TPR_ROC,'b-','linewidth',2);
-  title(['Receiver Operating Characteristic curve, area=' num2str(AREA) ...
-       ', std = ',num2str(SE)]);
-  xlabel('1 - Specificity');
-  ylabel('Sensitivity');
- 
-end
+% if fig(1)=='f',
+%   figure
+%   %fill([1 FPR_ROC 0],[0 TPR_ROC 0]','b');drawnow;
+%   ylim([0 1])
+%   plot(FPR_ROC,TPR_ROC,'b-','linewidth',2);
+%   title(['Receiver Operating Characteristic curve, area=' num2str(AREA) ...
+%        ', std = ',num2str(SE)]);
+%   xlabel('1 - Specificity');
+%   ylabel('Sensitivity');
+%  
+% end
 
 FPR_ROC = FPR_ROC(2:end);
 TPR_ROC = TPR_ROC(2:end);

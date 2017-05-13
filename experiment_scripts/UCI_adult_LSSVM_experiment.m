@@ -6,6 +6,8 @@ load(path_to_data)
 
 general_output=sprintf('%s/smp_%d/bs_%d/',path_to_results,nr_samples,batch_size);
 output_path=sprintf('%s/smp_%d/bs_%d/%s/',path_to_results,nr_samples,batch_size,method);
+fprintf('Making folder %s',output_path)
+mkdir(output_path)
 
 for r=1:nr_runs
     s = RandStream('mt19937ar','Seed',r);    
@@ -25,6 +27,11 @@ for r=1:nr_runs
     ix=randperm(s,size(test,1))';
     test=test(ix(1:1000),:);
     test_class=test_class(ix(1:1000),:);
+    
+    train_class(train_class~=1)=-1;
+    train_class(train_class==2)=1;
+    test_class(test_class~=1)=-1;
+    test_class(test_class==2)=1;
     
     fprintf('Number of training data points %d-%d, class %d\n',size(train,1),size(train,2),size(train_class,1));
     fprintf('Number of test data points %d-%d\n',size(test,1),size(test,2));

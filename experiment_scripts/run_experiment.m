@@ -20,6 +20,11 @@ start_tuning=tic;
 validation_res=zeros(length(kernel_params),length(gamma_params));
 k=1;
 kernel='RBF_kernel';
+if length(kernel_params)==1 && length(kernel_params)==1
+      gamma = gamma_params(1);
+      kernel = kernel_params(1);
+      tuning_time=0;
+else
    start_tuning=tic;  
    for i=1:length(kernel_params)
      for j=1:length(gamma_params)
@@ -71,6 +76,8 @@ kernel='RBF_kernel';
        end
    end
    tuning_time=toc(start_tuning)
+end
+   
    fprintf('Performances')
    %Get best options
    [minp,ic] = max(validation_res,[],1);
@@ -93,14 +100,15 @@ kernel='RBF_kernel';
    ix=randperm(s,size(training_data,1))';
    training_data=training_data(ix,:);
    training_class=training_class(ix,:);
-   [selected_points,selected_labels,~,~,~]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points_up,data_limit,experiment_name,warping);
+   [selected_points,selected_labels,~,~,~]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,0);
    runtime=toc
    best_options=options;
    aucs=[];
    aucs_lssvm=[];
-   for k=1:length(selected_kernels)
+   for k=1:length(selected_points)
        Xs=cell2mat(selected_points(k));
-       aucs(k)=run_inference_lssvm(Xs,Xs,folds{k}.train_class,cell2mat(selected_labels(k)),test_data,test_class,best_options)
+       Ys=cell2mat(selected_labels(k));
+       aucs(k)=run_inference_lssvm(Xs,training_data,training_class,Ys,test_data,test_class,options)
    end
  results.selected_points=selected_points;
  results.selected_labels=selected_labels;
@@ -292,19 +300,19 @@ function [area]=run_inference(kernel,selected_tr_points,selected_tr_labels,test_
 end
 
 function [area]=run_inference_lssvm(Xs,training_data,training_classes,Ys,test_data,test_class,options)
-
+gamma=1;
 %fprintf('sigma %f',options.t)
 features = AFEm(Xs,options.kernel_type, options.kernel,Xs);    
-% try,
-%   [CostL3, gamma_optimal] = bay_rr(features,Ys,options.gamma,1);
-% catch,
-%   warning('no Bayesian optimization of the regularization parameter');
-%   gamma_optimal = gamma;
-% end
+try,
+  [CostL3, gamma_optimal] = bay_rr(features,Ys,options.gamma,1);
+catch,
+  warning('no Bayesian optimization of the regularization parameter');
+  gamma_optimal = gamma;
+end
 [w,b] = ridgeregress(features,Ys,options.gamma);
 Yh0 = AFEm(Xs,options.kernel_type, options.kernel,test_data)*w+b;
 echo off;         
-[area,se,thresholds,oneMinusSpec,Sens]=roc(Yh0,test_class,['n']);
+[area,se,thresholds,oneMinusSpec,Sens]=roc(Yh0,test_class);
 area
 end
 

@@ -59,7 +59,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             Xs=train_fea_incremental(1:Nc,:);
             Ys=train_fea_class_incremental(1:Nc,:);
             crit_old=-inf;
-            for tel=1:5*length(train_fea_incremental)
+            for tel=1:length(train_fea_incremental)
                 Xsp=Xs; Ysp=Ys;
                 S=ceil(length(train_fea_incremental)*rand(1));
                 Sc=ceil(Nc*rand(1));
@@ -87,6 +87,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
        %fprintf('Saved kernel of size %d at point: %d\n',size(kernel,1),model_observation_points(point))
        lists_of_dists{point}=current_Dists;
        list_of_selected_times(point)=toc;
+       %point=point+1;
     end
     if point<=length(model_observation_points) && model_size+j>=model_observation_points(point)
         point=point+1;
