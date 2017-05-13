@@ -59,9 +59,9 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             Xs=train_fea_incremental(1:Nc,:);
             Ys=train_fea_class_incremental(1:Nc,:);
             crit_old=-inf;
-            for tel=1:length(train_fea_incremental)
+            for tel=1:size(train_fea_incremental,1)
                 Xsp=Xs; Ysp=Ys;
-                S=ceil(length(train_fea_incremental)*rand(1));
+                S=ceil(size(train_fea_incremental,1)*rand(1));
                 Sc=ceil(Nc*rand(1));
                 Xs(Sc,:) = train_fea_incremental(S,:);
                 Ys(Sc,:) = train_fea_class_incremental(S);
