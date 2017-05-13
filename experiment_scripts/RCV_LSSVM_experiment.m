@@ -1,80 +1,19 @@
-function []=RCV_experiments(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval,warping,blda,params_per_run,betas,alphas,kernels,k,WeightMode,NeighborMode)
-switch nargin
-    case 15
-        NeighborModes={'Supervised'};
-        WeightModes={'HeatKernel','Cosine'}
-        ks=[0];
-    case 18
-        NeighborModes={NeighborMode};
-        WeightModes={WeightMode}
-        ks=[k];
-end
+function []=RCV_LSSVM_experiment(method,path_to_data,path_to_results,path_to_code,nr_runs,nr_samples,batch_size,data_limit,interval)
 %USPS mat contains train,train_class,test and test_class
 %we use one vs all strategy
 addpath(genpath(path_to_code))  
 load(path_to_data)
 
+general_output=sprintf('%s/smp_%d/bs_%d/',path_to_results,nr_samples,batch_size);
+output_path=sprintf('%s/smp_%d/bs_%d/%s/',path_to_results,nr_samples,batch_size,method);
+fprintf('Making folder %s',output_path)
+mkdir(output_path)
 
-alphas_per_run=[];
-betas_per_run=[];
-kernels_per_run=[];
-
-if params_per_run
-   alphas_per_run=alphas;
-   betas_per_run=betas;
-   kernels_per_run=kernels;
-else
-reguBetaParams=betas;
-reguAlphaParams=alphas;
-kernel_params=kernels;
-end
-
-for ns=1:length(NeighborModes)
-    for ws=1:length(WeightModes)
-        for kNN=1:length(ks)
-
-    general_output=sprintf('%s/smp_%d/bs_%d/%s/%s/k_%d/',path_to_results,nr_samples,batch_size,NeighborModes{ns},WeightModes{ws},ks(kNN));
-    output_path=sprintf('%s/smp_%d/bs_%d/%s/%s/k_%d/%s/',path_to_results,nr_samples,batch_size,NeighborModes{ns},WeightModes{ws},ks(kNN),method);
-
-    fprintf('Making folder %s',output_path)
-    mkdir(output_path)
-    param_info=sprintf('%s/params.txt',output_path)
-    fileID = fopen(param_info,'w');
-
-
-    fprintf(fileID,'Beta params=: ');
-    for i=1:length(reguBetaParams)
-       fprintf(fileID,'%1.3f',reguBetaParams(i));
-    end
-    fprintf(fileID,'\n');
-    fprintf(fileID,'Alpha params: ');
-    for i=1:length(reguAlphaParams)
-       fprintf(fileID,'%1.3f',reguAlphaParams(i));
-    end
-    fprintf(fileID,'\n');
-    fprintf(fileID,'Kernel params: ');
-    for i=1:length(kernel_params)
-       fprintf(fileID,'%1.3f',kernel_params(i));
-    end
-    fprintf(fileID,'\n')
-    fprintf(fileID,'Nr runs:%d \n',nr_runs);
-    fprintf(fileID,'nr_samples:%d \n',nr_samples);
-    fprintf(fileID,'batch_size:%d \n',batch_size);
-    fprintf(fileID,'data_limit:%d \n',data_limit);
-    fprintf(fileID,'interval:%d \n',interval);
-    fprintf(fileID,'Using warping?:%d \n',warping);
-    fprintf(fileID,'Using balancing?:%d \n',blda);
-
-    for r=1:nr_runs
+for r=1:nr_runs
         aucs=[];
         tuning_time=[];
         runtime=[];
         res=[];
-        if params_per_run
-            reguBetaParams=[betas_per_run(r)];
-            reguAlphaParams=[alphas_per_run(r)];
-            kernel_params=[kernels_per_run(r)];
-        end
         for c=1:4
            train=folds{r}.train;
            train_class=folds{r}.train_class;
@@ -102,7 +41,7 @@ for ns=1:length(NeighborModes)
            train_class(train_class==c)=1;
            test_class(test_class~=c)=-1;
            test_class(test_class==c)=1;
-           res1=run_experiment(train,train_class,test,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,method,data_limit,r,warping,blda,ks(kNN),WeightModes{ws},NeighborModes{ns})
+           res1=run_experiment(train,train_class,test,test_class,[0.5],[0.01],[],nr_samples,interval,batch_size,report_points,method,data_limit,r,0,0,[],[],[])
            aucs(c,:)=res1.aucs;
            selected_labels{c}=res1.selected_labels;
            selected_points{c}=res1.selected_points;
@@ -146,5 +85,4 @@ for ns=1:length(NeighborModes)
     %plot the result
     plot_results(general_output)
         end
-    end
-end
+

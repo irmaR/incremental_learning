@@ -109,11 +109,16 @@ for r=1:length(folds)
        runtime(c,:)=res1.runtime;
     end
     res.aucs=mean(aucs);
+    avg_aucs=mean(aucs);
+    stdev=std(aucs);
     res.stdev_aucs=std(aucs);
     res.tuning_time=mean(tuning_time);
     res.stdev_tuning_time=std(tuning_time);
     res.runtime=mean(runtime);
     res.stdev_runtime=std(runtime);
+    avg_runtime=mean(runtime);
+    std_runtime=std(runtime);
+    save(sprintf('%s/auc.mat',output_path),'avg_aucs','stdev','report_points','avg_runtime','std_runtime');
     results{r}=res;
 end
 

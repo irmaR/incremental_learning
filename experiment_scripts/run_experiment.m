@@ -61,7 +61,7 @@ else
             aucs=[];
             fprintf('Points selected, running inference')
               for s=1:size(selected_points,1)
-                  area=run_inference_lssvm(selected_points(s),folds{k}.train,folds{k}.train_class,selected_labels(s),folds{k}.test,folds{k}.test_class,options)
+                  area=run_inference_lssvm(selected_points(s),folds{k}.train,folds{k}.train_class,selected_labels(s),folds{k}.test,folds{k}.test_class,options);
                   %features   = AFEm(selected_points(s),options.kernel_type, options.kernel,X);
                   %features_t = AFEm(selected_points(s),options.kernel_type, options.kernel,folds{k}.test);
                   %[w,b,Yht] = ridgeregress(features,folds{k}.test_class,options.gamm,features_t);
@@ -108,7 +108,7 @@ end
    for k=1:length(selected_points)
        Xs=cell2mat(selected_points(k));
        Ys=cell2mat(selected_labels(k));
-       aucs(k)=run_inference_lssvm(Xs,training_data,training_class,Ys,test_data,test_class,options)
+       aucs(k)=run_inference_lssvm(Xs,training_data,training_class,Ys,test_data,test_class,options);
    end
  results.selected_points=selected_points;
  results.selected_labels=selected_labels;
@@ -313,7 +313,6 @@ end
 Yh0 = AFEm(Xs,options.kernel_type, options.kernel,test_data)*w+b;
 echo off;         
 [area,se,thresholds,oneMinusSpec,Sens]=roc(Yh0,test_class);
-area
 end
 
 
