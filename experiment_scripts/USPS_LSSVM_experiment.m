@@ -15,14 +15,15 @@ for r=1:length(folds)
     tuning_time=[];
     runtime=[];
     res=[];
+    
     for c=1:10
-    train=folds{r}.train;
-    train_class=folds{r}.train_class;
-    test=folds{r}.test;
-    test_class=folds{r}.test_class;
-    %standardize the training and test data
-    train=standardizeX(train);
-    test=standardizeX(test);
+       train=folds{r}.train;
+       train_class=folds{r}.train_class;
+       test=folds{r}.test;
+       test_class=folds{r}.test_class;
+       %standardize the training and test data
+       train=standardizeX(train);
+       test=standardizeX(test);
     
     %for each category in train class we run one learning/inference
     %procedure. We calculate AUCs and we average then
