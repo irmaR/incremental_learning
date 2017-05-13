@@ -74,7 +74,7 @@ fprintf(fileID,'interval:%d \n',interval);
 fprintf(fileID,'Using warping?:%d \n',warping);
 fprintf(fileID,'Using balancing?:%d \n',blda);
 
-for r=1:length(folds)
+for r=1:nr_runs
     if params_per_run
             reguBetaParams=[betas_per_run(r)];
             reguAlphaParams=[alphas_per_run(r)];

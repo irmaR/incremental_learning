@@ -10,7 +10,7 @@ output_path=sprintf('%s/smp_%d/bs_%d/%s/',path_to_results,nr_samples,batch_size,
 fprintf('Making folder %s',output_path)
 mkdir(output_path)
 
-for r=1:length(folds)
+for r=1:nr_runs
     aucs=[];
     tuning_time=[];
     runtime=[];
