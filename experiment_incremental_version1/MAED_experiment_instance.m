@@ -59,7 +59,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             Xs=train_fea_incremental(1:Nc,:);
             Ys=train_fea_class_incremental(1:Nc,:);
             crit_old=-inf;
-            for tel=1:size(train_fea_incremental,1)
+            for tel=1:500 %we are really doing them a favor, but it's so slow
                 Xsp=Xs; Ysp=Ys;
                 S=ceil(size(train_fea_incremental,1)*rand(1));
                 Sc=ceil(Nc*rand(1));
@@ -84,7 +84,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
        list_of_selected_data_points{point}=current_sample;
        list_of_selected_labels{point}=current_labels;
        list_of_kernels{point}=kernel;
-       %fprintf('Saved kernel of size %d at point: %d\n',size(kernel,1),model_observation_points(point))
+       fprintf('Saved kernel of size %d at point: %d\n',size(kernel,1),model_observation_points(point))
        lists_of_dists{point}=current_Dists;
        list_of_selected_times(point)=toc;
        %point=point+1;
