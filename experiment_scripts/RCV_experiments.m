@@ -80,17 +80,10 @@ for ns=1:length(NeighborModes)
            train_class=folds{r}.train_class;
            %delete later!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
            %ix=randperm(size(train,1));
-<<<<<<< HEAD
-           %train=train(ix(1:500),:);
-           %train_class=train_class(ix(1:500),:);
-           
-	   test=folds{r}.test;
-=======
            %train=train(ix(1:(size(train,1)/2)),:);
            %train_class=train_class(ix(1:(size(train_class,1)/2)),:);
            
            test=folds{r}.test;
->>>>>>> cefa7e795f7cd4b9d37d7f0beb8162db18ccf38b
            test_class=folds{r}.test_class;
 
         %standardize the training and test data
