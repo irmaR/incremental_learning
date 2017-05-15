@@ -6,8 +6,18 @@ list_of_kernels=cell(1, length(model_observation_points));
 lists_of_dists=cell(1, length(model_observation_points));
 
 %
-train_fea_incremental=train_fea(1:model_size,:);
-train_fea_class_incremental=train_class(1:model_size,:);
+classes=unique(train_class);
+ix1=find(train_class==classes(1));
+ix2=find(train_class==classes(2));  
+    
+nr_samples1=ceil(model_size/2);
+nr_samples2=model_size-nr_samples1;
+
+train_fea_incremental=[train_fea(ix1(1:nr_samples1),:);train_fea(ix2(1:nr_samples2),:)];
+train_fea_class_incremental=[train_class(ix1(1:nr_samples1),:);train_class(ix2(1:nr_samples2),:)];
+
+%train_fea_incremental=train_fea(1:model_size,:);
+%train_fea_class_incremental=train_class(1:model_size,:);
 %current_sample=train_fea_incremental;
 %current_labels=train_fea_class_incremental;
 [ranking,values,current_D,kernel] = MAED(train_fea_incremental,train_fea_class_incremental,size(train_fea_incremental,1),options,data_limit,warping);
@@ -138,7 +148,6 @@ function [current_sample,current_labels,ranking,kernel,current_D]=update_model_r
     
     nr_samples1=ceil(nr_samples/2);
     nr_samples2=nr_samples-nr_samples1;
-    
     train_fea_incremental=[train_fea_incremental(ix1(1:nr_samples1),:);train_fea_incremental(ix2(1:nr_samples2),:)];
     train_fea_class_incremental=[train_fea_class_incremental(ix1(1:nr_samples1),:);train_fea_class_incremental(ix2(1:nr_samples2),:)];
     [ranking,values,current_D,kernel] = MAED(train_fea_incremental,train_fea_class_incremental,nr_samples,options,data_limit,warping);
