@@ -1,19 +1,15 @@
-function [avg_runtimes_inct,std_runtimes_inct,avg_runtimes_batch,std_runtimes_batch,avg_runtimes_lssvm,std_runtimes_lssvm]=plot_runtimes_over_samples(path_to_results,title_text)
+function []=plot_runtimes_over_samples(path_to_results,title_text)
 samples=[20,40,60,80,100];
 bs=100;
-avg_runtimes_inct=[];
-std_runtimes_inct=[];
+avg_auc_incr=[];
+std_auc_inct=[];
 
-avg_runtimes_batch=[];
-std_runtimes_batch=[];
-
-avg_runtimes_lssvm=[];
-std_runtimes_lssvm=[];
+avg_auc_rnd=[];
+std_auc_rnd=[];
 
 for i=1:length(samples)
     path_to_incr=sprintf('%s/smp_%d/bs_%d/Supervised/HeatKernel/k_0/incr/auc.mat',path_to_results,samples(i),bs);
-    path_to_batch=sprintf('%s/smp_%d/bs_%d/Supervised/HeatKernel/k_0/batch/auc.mat',path_to_results,samples(i),bs);
-    path_to_lssvm=sprintf('%s/smp_%d/bs_%d/Supervised/HeatKernel/k_0/lssvm/auc.mat',path_to_results,samples(i),bs);
+    path_to_random=sprintf('%s/smp_%d/bs_%d/Supervised/HeatKernel/k_0/rnd/auc.mat',path_to_results,samples(i),bs);
   
     if exist(path_to_incr, 'file') == 2
     avg_runtime_inct=load(path_to_incr,'avg_runtime')

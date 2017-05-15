@@ -6,7 +6,7 @@ aucs_lssvm=[];
 
 results=[];
 stdevs=[];
-path_to_incr=sprintf('%s/incr/auc.mat',path_to_results);
+path_to_incr=sprintf('%s/incr_bal/auc.mat',path_to_results);
 path_to_batch=sprintf('%s/batch/auc.mat',path_to_results);
 path_to_rnd=sprintf('%s/rnd/auc.mat',path_to_results);
 
@@ -48,6 +48,7 @@ if exist(path_to_lssvm, 'file') == 2
     stdevs{counter}=stdevs_lssvm;
     report_points=load(path_to_lssvm,'report_points')
     results{counter}=aucs_lssvm;
+    counter=counter+1;
 end
 
 if exist(path_to_rnd, 'file') == 2
@@ -62,6 +63,8 @@ if exist(path_to_rnd, 'file') == 2
     counter=counter+1;
 end
 
+
+
 counter=counter-1;
 fig = figure('visible', 'off');
 colorVec = hsv(counter);
@@ -73,6 +76,7 @@ std_aucs={}
 stdevs
 for i=1:counter
       %errorbar(report_points.report_points,results{1,i}.avg_aucs,stdevs{1,i}.stdev)
+      %length(report_points.report_points)
       plot(report_points.report_points,results{1,i}.avg_aucs,'LineWidth',2,'Color',colorVec(i,:))
       legendInfo{i} = [labels{i}];
       mean_aucs{i}=mean(results{1,i}.avg_aucs);

@@ -4,6 +4,8 @@ function [results]=run_experiment(training_data,training_class,test_data,test_cl
           results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'incr',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('incr_bal')}
           results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'incr_bal',r,warping,blda,k,WeightMode,NeighborMode);
+       case {lower('batch_bal')}
+          results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'batch_bal',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('batch')}
           results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'batch',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('rnd')}
@@ -264,7 +266,7 @@ function [area]=run_inference(kernel,selected_tr_points,selected_tr_labels,test_
        fprintf('only one label selected!\n')
        unique(selected_tr_labels)
        fprintf('\n')
-       area=0.0;
+       area=NaN;
        return
    end
 
