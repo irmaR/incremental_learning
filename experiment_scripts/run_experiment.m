@@ -9,6 +9,7 @@ function [results]=run_experiment(training_data,training_class,test_data,test_cl
        case {lower('batch')}
           results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'batch',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('rnd')}
+          fprintf('Running random sampling balanced version')
           results=incremental(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,kernel_params,nr_samples,interval,batch_size,report_points,data_limit,'rnd',r,warping,blda,k,WeightMode,NeighborMode);
        case {lower('lssvm')}
           results=incremental_lssvm(training_data,training_class,test_data,test_class,reguAlphaParams,reguBetaParams,nr_samples,interval,batch_size,report_points,data_limit,'lssvm',r);
