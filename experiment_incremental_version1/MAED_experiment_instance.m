@@ -113,7 +113,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             old_labels=current_labels;
             old_kernel=kernel;
             old_dists=current_Dists;
-            if options.blda
+            if options.bLDA
               [current_sample,current_labels,ranking,kernel,current_Dists]=update_model_random_balanced(options,model_size,ranking,values,train_fea_incremental,train_fea_class_incremental,new_points,new_classes,current_Dists,data_limit,warping);
             else
               [current_sample,current_labels,ranking,kernel,current_Dists]=update_model_random(options,model_size,ranking,values,train_fea_incremental,train_fea_class_incremental,new_points,new_classes,current_Dists,data_limit,warping);
