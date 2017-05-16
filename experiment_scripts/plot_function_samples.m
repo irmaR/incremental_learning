@@ -27,16 +27,16 @@ for i=1:length(samples)
     nr_report_points=length(report_points.report_points)
     
     if exist(path_to_incr, 'file') == 2
-    avg_auc_inct=load(path_to_incr,'avg_aucs')
-    std_auc_inct=load(path_to_incr,'stdev')
+    avg_auc_inct=load(path_to_incr,'avg_aucs');
+    std_auc_inct=load(path_to_incr,'stdev');
     avg_aucs_inct{i}=avg_auc_inct.avg_aucs;
     std_aucs_inct{i}=std_auc_inct.stdev;  
     
     end
 
     if exist(path_to_random, 'file') == 2
-    avg_auc_rnd=load(path_to_random,'avg_aucs')
-    std_auc_rnd=load(path_to_random,'stdev')
+    avg_auc_rnd=load(path_to_random,'avg_aucs');
+    std_auc_rnd=load(path_to_random,'stdev');
     avg_aucs_rnd{i}=avg_auc_rnd.avg_aucs;
     std_aucs_rnd{i}=std_auc_rnd.stdev;
     report_points=load(path_to_incr,'report_points');          
@@ -51,7 +51,7 @@ for i=1:length(samples)
     tmp=avg_aucs_rnd{i};
     random_points(i)=nanmean(tmp);
 end
-jump=floor(nr_report_points/4);
+jump=floor(nr_report_points/80)
 for i=1:length(samples)
     tmp=avg_aucs_inct{i}
     incr_bal_point1(i)=nanmean(tmp(1:1));
@@ -61,10 +61,6 @@ for i=1:length(samples)
 end
 
 fig=figure
-random_points(1)=0.5;
-random_points
-incr_bal_point3
-incr_bal_point4
 plot(samples,random_points,'m+-','LineWidth',5);hold on;
 plot(samples,incr_bal_point2,'ro','LineWidth',5);hold on;
 plot(samples,incr_bal_point3,'go','LineWidth',5);hold on;
@@ -72,7 +68,7 @@ plot(samples,incr_bal_point4,'bo','LineWidth',5);hold on;
 legendInfo{1} = ['random'];
 legendInfo{2} = ['incremental'];
 legend(legendInfo);
-ylim([0 1]);
+%ylim([0 1]);
 % avg_runtimes_inct
 % avg_runtimes_batch
 % fig = figure('visible', 'off');
