@@ -42,17 +42,10 @@ for i=1:length(samples)
     end
 end
 random_points=[];
-incr_bal_point1=[];
-incr_bal_point2=[];
-incr_bal_point3=[]
-incr_bal_point4=[];
 for i=1:length(samples)
     tmp=avg_aucs_rnd{i}
-    random_points(i)=tmp(1);
+    random_points(i)=tmp(;
 end
-
-
-
 random_points
 % avg_runtimes_inct
 % avg_runtimes_batch
