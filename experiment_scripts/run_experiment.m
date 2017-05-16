@@ -35,6 +35,8 @@ else
          options.gamma=gamma_params(j);
          options.kernel=kernel_params(i);
          options.kernel_type=kernel;
+         options.test=test_data;
+         options.test_class=test_class;
          folds=split_into_k_folds(training_data,training_class,5);
                    performances=[];
           
@@ -95,6 +97,8 @@ end
    options.kernel_type = 'RBF_kernel';
    options.kernel = kernel;
    options.gamma=gamma;
+   options.test=test_data;
+   options.test_class=test_class;
    sprintf('Run %d, kernel: %f, gamma: %f',run,options.kernel,options.gamma)
    %measure time
    tic;
@@ -103,23 +107,23 @@ end
    ix=randperm(s,size(training_data,1))';
    training_data=training_data(ix,:);
    training_class=training_class(ix,:);
-   [selected_points,selected_labels,~,~,~]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,0);
+   [selected_points,selected_labels,~,~,~,lists_of_areas]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,0);
    runtime=toc
    best_options=options;
-   aucs=[];
-   aucs_lssvm=[];
-   for k=1:length(selected_points)
-       Xs=cell2mat(selected_points(k));
-       Ys=cell2mat(selected_labels(k));
-       aucs(k)=run_inference_lssvm(Xs,training_data,training_class,Ys,test_data,test_class,options);
-   end
+%    aucs=[];
+%    aucs_lssvm=[];
+%    for k=1:length(selected_points)
+%        Xs=cell2mat(selected_points(k));
+%        Ys=cell2mat(selected_labels(k));
+%        aucs(k)=run_inference_lssvm(Xs,training_data,training_class,Ys,test_data,test_class,options);
+%    end
  results.selected_points=selected_points;
  results.selected_labels=selected_labels;
  results.best_options=best_options;
  results.validation_res=validation_res;
  results.kernel=kernel;
  results.gamma=gamma;
- results.aucs=aucs;
+ results.aucs=cell2mat(lists_of_areas);
  results.tuning_time=tuning_time;
  results.report_points=report_points;
  results.test_points=test_data;
@@ -155,6 +159,8 @@ function [results]=incremental(training_data,training_class,test_data,test_class
           options.k=kNN;
           options.WeightMode=WeightMode;
           options.NeighborMode=NeighborMode;
+          options.test=test_data;
+          options.test_class=test_class;
           sprintf('Run %d, Alpha: %f, Sigma: %f',run,options.ReguAlpha,options.t)
           list_of_selected_data_points={};
           list_of_selected_labels={};
@@ -226,6 +232,8 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    options.k=kNN;
    options.WeightMode=WeightMode;
    options.NeighborMode=NeighborMode;
+   options.test=test_data;
+   options.test_class=test_class;
    sprintf('Run %d, Alpha: %f, Sigma: %f',run,options.ReguAlpha,options.t)
    %measure time
    tic;
@@ -234,15 +242,16 @@ function [results]=incremental(training_data,training_class,test_data,test_class
    ix=randperm(s,size(training_data,1))';
    training_data=training_data(ix,:);
    training_class=training_class(ix,:);
-   [selected_points,selected_labels,list_of_selected_times,selected_kernels,list_of_dists]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,warping);
+   [selected_points,selected_labels,list_of_selected_times,selected_kernels,list_of_dists,lists_of_areas]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,warping);
    runtime=toc
    best_options=options;
-   aucs=[];
-   aucs_lssvm=[];
-   for k=1:length(selected_kernels)
-       Xs=cell2mat(selected_points(k));
-       aucs(k)=run_inference(cell2mat(selected_kernels(k)),Xs,cell2mat(selected_labels(k)),test_data,test_class,best_options);
-   end
+%    aucs=[];
+%    for k=1:length(selected_kernels)
+%        Xs=cell2mat(selected_points(k));
+%        aucs(k)=run_inference(cell2mat(selected_kernels(k)),Xs,cell2mat(selected_labels(k)),test_data,test_class,best_options);
+%    end
+ fprintf('AUCs')
+ 
  results.selected_points=selected_points;
  results.selected_labels=selected_labels;
  results.kernels=selected_kernels;
@@ -251,7 +260,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
  results.reguAlpha=reguAlpha;
  results.reguBeta=regu_beta;
  results.sigma=kernel_sigma;
- results.aucs=aucs;
+ results.aucs=cell2mat(lists_of_areas);
  results.tuning_time=tuning_time;
  results.report_points=report_points;
  results.test_points=test_data;

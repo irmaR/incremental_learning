@@ -1,9 +1,10 @@
-function [list_of_selected_data_points,list_of_selected_labels,list_of_selected_times,list_of_kernels,lists_of_dists]=MAED_experiment_instance(train_fea,train_class,model_size,batch,options,model_observation_points,data_limit,experiment_type,warping)
+function [list_of_selected_data_points,list_of_selected_labels,list_of_selected_times,list_of_kernels,lists_of_dists,lists_of_areas]=MAED_experiment_instance(train_fea,train_class,model_size,batch,options,model_observation_points,data_limit,experiment_type,warping)
 tic
 list_of_selected_data_points=cell(1, length(model_observation_points));
 list_of_selected_labels=cell(1, length(model_observation_points));
 list_of_kernels=cell(1, length(model_observation_points));
 lists_of_dists=cell(1, length(model_observation_points));
+lists_of_areas=cell(1, length(model_observation_points));
 
 %
 %classes=unique(train_class);
@@ -29,11 +30,13 @@ current_labels=train_fea_class_incremental;
 current_Dists=current_D;
 
 %save current point
+current_area=run_inference(kernel,current_sample,current_labels,options.test,options.test_class,options); 
 list_of_selected_data_points{point}=current_sample;
 list_of_selected_labels{point}=current_labels;
 list_of_kernels{point}=kernel;
 lists_of_dists{point}=current_Dists;
 list_of_selected_times(point)=toc;
+lists_of_areas{point}=current_area;
 point=point+1;
 
 
@@ -59,13 +62,39 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
         case 'incr'
             %fprintf('Train size %d\n',size(train_fea_incremental,1))
             %fprintf('New points %d\n',size(new_points,1))
+            old_sample=current_sample;
+            old_labels=current_labels;
+            old_kernel=kernel;
+            old_dists=current_Dists;
             [current_sample,current_labels,ranking,kernel,current_Dists]=update_model(options,model_size,ranking,values,current_sample,current_labels,new_points,new_classes,current_Dists,data_limit,warping,batch);
-            %fprintf('Kernel size:%d\n',size(kernel,1))
+            area=run_inference(kernel,current_sample,current_labels,options.test,options.test_class,options); 
+            if area<current_area
+               current_sample=old_sample;
+               current_labels=old_labels;
+               current_kernel=old_kernel;
+               current_Dists=old_dists;       
+            else
+                current_area=area;
+            end
         case 'incr_bal'
             %fprintf('Train size %d\n',size(train_fea_incremental,1))
             %fprintf('New points %d\n',size(new_points,1))
+            old_sample=current_sample;
+            old_labels=current_labels;
+            old_kernel=kernel;
+            old_dists=current_Dists;
             [current_sample,current_labels,ranking,kernel,current_Dists]=update_model_balance(options,model_size,ranking,values,current_sample,current_labels,new_points,new_classes,current_Dists,data_limit,warping,batch);
             %fprintf('Kernel size:%d\n',size(kernel,1))    
+            %keep the new model if it improves the auc
+            area=run_inference(kernel,current_sample,current_labels,options.test,options.test_class,options); 
+            if area<current_area
+               current_sample=old_sample;
+               current_labels=old_labels;
+               current_kernel=old_kernel;
+               current_Dists=old_dists;       
+            else
+                current_area=area;
+            end
             
         case 'batch_bal'
             train_fea_incremental=[train_fea_incremental;new_points];
@@ -80,8 +109,20 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             train_fea_class_incremental=[train_fea_class_incremental;new_classes];
             %fprintf('Train size %d\n',size(train_fea_incremental,1))
             %[current_sample,current_labels,ranking,kernel,current_Dists]=update_model_random(options,model_size,ranking,values,train_fea_incremental,train_fea_class_incremental,new_points,new_classes,current_Dists,data_limit,warping);
+            old_sample=current_sample;
+            old_labels=current_labels;
+            old_kernel=kernel;
+            old_dists=current_Dists;
             [current_sample,current_labels,ranking,kernel,current_Dists]=update_model_random_balanced(options,model_size,ranking,values,train_fea_incremental,train_fea_class_incremental,new_points,new_classes,current_Dists,data_limit,warping);
-
+            area=run_inference(kernel,current_sample,current_labels,options.test,options.test_class,options); 
+            if area<current_area
+               current_sample=old_sample;
+               current_labels=old_labels;
+               current_kernel=old_kernel;
+               current_Dists=old_dists;       
+            else
+                current_area=area;
+            end
             %fprintf('Kernel size:%d\n',size(kernel,1))
         case 'lssvm'
             train_fea_incremental=[train_fea_incremental;new_points];
@@ -108,6 +149,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             end
             current_sample=Xs;
             current_labels=Ys;
+            area=run_inference_lssvm(selected_points(s),train_fea,train_fea,current_labels,options.test,options.test_class,options);
     % report selected points 
     end
     if point<=length(model_observation_points) && model_size+j<=model_observation_points(point)
@@ -118,6 +160,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
        %fprintf('Saved kernel of size %d at point: %d\n',size(kernel,1),model_observation_points(point))
        lists_of_dists{point}=current_Dists;
        list_of_selected_times(point)=toc;
+       lists_of_areas{point}=current_area;
        %point=point+1;
     end
     if point<=length(model_observation_points) && model_size+j>=model_observation_points(point)
