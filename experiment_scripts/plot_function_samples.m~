@@ -17,13 +17,14 @@ bs=100;
 %avg_aucs_rnd=zeros(length(samples),length(report_points.report_points));
 %std_aucs_inct=zeros(length(samples),length(report_points.report_points));
 %std_aucs_rnd=zeros(length(samples),length(report_points.report_points));
-    
+
+
 
 for i=1:length(samples)
-    path_to_incr=sprintf('%s/smp_%d/bs_%d/Supervised/HeatKernel/k_0/incr_bal/auc.mat',path_to_results,samples(i),bs);
+    path_to_incr=sprintf('%s/smp_%d/bs_%d/Supervised/HeatKernel/k_0/incr/auc.mat',path_to_results,samples(i),bs);
     path_to_random=sprintf('%s/smp_%d/bs_%d/Supervised/HeatKernel/k_0/rnd/auc.mat',path_to_results,samples(i),bs);
     report_points=load(path_to_incr,'report_points')
-    
+    nr_report_points=length(report_points.report_points)
     
     if exist(path_to_incr, 'file') == 2
     avg_auc_inct=load(path_to_incr,'avg_aucs')
@@ -42,11 +43,33 @@ for i=1:length(samples)
     end
 end
 random_points=[];
+incr_bal_point1=[];
+incr_bal_point2=[];
+incr_bal_point3=[]
+incr_bal_point4=[];
 for i=1:length(samples)
-    tmp=avg_aucs_rnd{i}
-    random_points(i)=tmp(;
+    tmp=avg_aucs_rnd{i};
+    random_points(i)=nanmean(tmp);
 end
-random_points
+jump=floor(nr_report_points/4);
+for i=1:length(samples)
+    tmp=avg_aucs_inct{i}
+    incr_bal_point1(i)=nanmean(tmp(1:1));
+    incr_bal_point2(i)=nanmean(tmp(2:0+3*jump));
+    incr_bal_point3(i)=nanmean(tmp(2:0+4*jump));
+    incr_bal_point4(i)=nanmean(tmp(2:nr_report_points));
+end
+
+fig=figure
+random_points(1)=0
+plot(samples,random_points,'m+-','LineWidth',5);hold on;
+plot(samples,incr_bal_point2,'ro','LineWidth',5);hold on;
+plot(samples,incr_bal_point3,'go','LineWidth',5);hold on;
+plot(samples,incr_bal_point4,'bo','LineWidth',5);hold on;
+legendInfo{1} = ['random'];
+legendInfo{2} = ['incremental'];
+legend(legendInfo);
+ylim([0 1]);
 % avg_runtimes_inct
 % avg_runtimes_batch
 % fig = figure('visible', 'off');
