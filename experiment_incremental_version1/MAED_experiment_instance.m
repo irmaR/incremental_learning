@@ -21,22 +21,26 @@ train_fea=train_fea(ix,:);
 train_class=train_class(ix,:);
 train_fea_incremental=train_fea(1:model_size,:);
 train_fea_class_incremental=train_class(1:model_size,:);
-%current_sample=train_fea_incremental;
-%current_labels=train_fea_class_incremental;
-[ranking,values,current_D,kernel] = MAED(train_fea_incremental,train_fea_class_incremental,size(train_fea_incremental,1),options,data_limit,warping);
 point=1;
+if strcmp(experiment_type,'lssvm')
+    current_sample=train_fea_incremental;
+    current_labels=train_fea_class_incremental;
+    current_area=0.5;
+else
+[ranking,values,current_D,kernel] = MAED(train_fea_incremental,train_fea_class_incremental,size(train_fea_incremental,1),options,data_limit,warping);
 current_sample=train_fea_incremental;
 current_labels=train_fea_class_incremental;
 current_Dists=current_D;
-
 %save current point
 current_area=run_inference(kernel,current_sample,current_labels,options.test,options.test_class,options); 
-list_of_selected_data_points{point}=current_sample;
-list_of_selected_labels{point}=current_labels;
 list_of_kernels{point}=kernel;
 lists_of_dists{point}=current_Dists;
+end
+list_of_selected_data_points{point}=current_sample;
+list_of_selected_labels{point}=current_labels;
 list_of_selected_times(point)=toc;
 lists_of_areas{point}=current_area;
+
 point=point+1;
 
 
@@ -181,9 +185,10 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
        %fprintf('reporting...')
        list_of_selected_data_points{point}=current_sample;
        list_of_selected_labels{point}=current_labels;
-       list_of_kernels{point}=kernel;
-       %fprintf('Saved kernel of size %d at point: %d\n',size(kernel,1),model_observation_points(point))
-       lists_of_dists{point}=current_Dists;
+       if ~strcmp(experiment_type,'lssvm')
+          list_of_kernels{point}=kernel;
+          lists_of_dists{point}=current_Dists;
+       end
        list_of_selected_times(point)=toc;
        lists_of_areas{point}=current_area;
        %point=point+1;
