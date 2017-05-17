@@ -1,11 +1,12 @@
-function [list_of_selected_data_points,list_of_selected_labels,list_of_selected_times,list_of_kernels,lists_of_dists,lists_of_areas]=MAED_experiment_instance(train_fea,train_class,model_size,batch,options,model_observation_points,data_limit,experiment_type,warping)
-starting_count=tic
+function [list_of_selected_data_points,list_of_selected_labels,list_of_selected_times,lists_of_processing_times,list_of_kernels,lists_of_dists,lists_of_areas]=MAED_experiment_instance(train_fea,train_class,model_size,batch,options,model_observation_points,data_limit,experiment_type,warping)
+starting_count=tic;
 list_of_selected_data_points=cell(1, length(model_observation_points));
 list_of_selected_labels=cell(1, length(model_observation_points));
 list_of_kernels=cell(1, length(model_observation_points));
 lists_of_dists=cell(1, length(model_observation_points));
 lists_of_areas=cell(1, length(model_observation_points));
-lists_of_times=cell(1, length(model_observation_points));
+list_of_selected_times=zeros(1, length(model_observation_points));
+lists_of_processing_times=zeros(1, length(model_observation_points));
 
 %classes=unique(train_class);
 %ix1=find(train_class==classes(1));
@@ -38,13 +39,15 @@ lists_of_dists{point}=current_Dists;
 end
 list_of_selected_data_points{point}=current_sample;
 list_of_selected_labels{point}=current_labels;
-list_of_selected_times(point)=toc;
+list_of_selected_times(point)=toc(starting_count);
+lists_of_processing_times(point)=toc(starting_count);
 lists_of_areas{point}=current_area;
 
 point=point+1;
 
 
 for j=0:batch:(size(train_fea,1)-model_size-batch)
+    starting_count1=tic;
     %fprintf('Fetching %d - %d\n',model_size+j+1,model_size+j+batch)
     %fprintf('Batch %d',j)
     %fprintf('iter %d',model_size+j-batch)
@@ -190,6 +193,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
           lists_of_dists{point}=current_Dists;
        end
        list_of_selected_times(point)=toc(starting_count);
+       lists_of_processing_times(point)=toc(starting_count1);
        lists_of_areas{point}=current_area;
        %point=point+1;
     end
