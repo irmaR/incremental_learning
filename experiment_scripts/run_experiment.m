@@ -62,7 +62,7 @@ else
             ix=randperm(s,size(train_batch,1))';
             train_batch=train_batch(ix,:);
             train_batch_class=train_batch_class(ix,:);
-            [selected_points,selected_labels,~,~,~]=MAED_experiment_instance(train_batch,train_batch_class,nr_samples,batch_size,options,report_points_up,data_limit,experiment_name,0);
+            [selected_points,selected_labels,list_of_selected_times,~,~]=MAED_experiment_instance(train_batch,train_batch_class,nr_samples,batch_size,options,report_points_up,data_limit,experiment_name,0);
             aucs=[];
             fprintf('Points selected, running inference')
               for s=1:size(selected_points,1)
@@ -107,7 +107,7 @@ end
    ix=randperm(s,size(training_data,1))';
    training_data=training_data(ix,:);
    training_class=training_class(ix,:);
-   [selected_points,selected_labels,~,~,~,lists_of_areas]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,0);
+   [selected_points,selected_labels,list_of_selected_times,~,~,lists_of_areas]=MAED_experiment_instance(training_data,training_class,nr_samples,batch_size,options,report_points,data_limit,experiment_name,0);
    runtime=toc
    best_options=options;
 %    aucs=[];
@@ -123,6 +123,7 @@ end
  results.validation_res=validation_res;
  results.kernel=kernel;
  results.gamma=gamma;
+ results.selection_times=list_of_selected_times;
  results.aucs=cell2mat(lists_of_areas);
  results.tuning_time=tuning_time;
  results.report_points=report_points;
@@ -258,6 +259,7 @@ function [results]=incremental(training_data,training_class,test_data,test_class
  results.best_options=best_options;
  results.validation_res=validation_res;
  results.reguAlpha=reguAlpha;
+ results.selection_times=list_of_selected_times;
  results.reguBeta=regu_beta;
  results.sigma=kernel_sigma;
  results.aucs=cell2mat(lists_of_areas);

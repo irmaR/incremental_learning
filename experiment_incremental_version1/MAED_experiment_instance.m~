@@ -189,7 +189,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
           list_of_kernels{point}=kernel;
           lists_of_dists{point}=current_Dists;
        end
-       list_of_selected_times(point)=toc(starting_count);
+       list_of_selected_times(point)=toc(;
        lists_of_areas{point}=current_area;
        %point=point+1;
     end

@@ -6,7 +6,7 @@ aucs_lssvm=[];
 
 results=[];
 stdevs=[];
-path_to_incr=sprintf('%s/incr_bal/auc.mat',path_to_results);
+path_to_incr=sprintf('%s/incr/auc.mat',path_to_results);
 path_to_batch=sprintf('%s/batch/auc.mat',path_to_results);
 path_to_rnd=sprintf('%s/rnd/auc.mat',path_to_results);
 
