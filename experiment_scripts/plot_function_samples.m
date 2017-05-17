@@ -1,5 +1,5 @@
 function []=plot_function_samples(path_to_results,title_text)
-samples=[20,40,60,80,100];
+samples=[5,10,20,40,60,80,100,120];
 bs=100;
 %avg_aucs_inct=[];
 %std_aucs_inct=[];
@@ -54,21 +54,31 @@ end
 jump=floor(nr_report_points/80)
 for i=1:length(samples)
     tmp=avg_aucs_inct{i}
-    incr_bal_point1(i)=nanmean(tmp(1:1));
+    incr_bal_point1(i)=nanmean(tmp(2:2));
     incr_bal_point2(i)=nanmean(tmp(0+3*jump));
     incr_bal_point3(i)=nanmean(tmp(0+4*jump));
     incr_bal_point4(i)=nanmean(tmp(nr_report_points));
 end
 
 fig=figure
-plot(samples,random_points,'m+-','LineWidth',5);hold on;
-plot(samples,incr_bal_point2,'ro','LineWidth',5);hold on;
-plot(samples,incr_bal_point3,'go','LineWidth',5);hold on;
-plot(samples,incr_bal_point4,'bo','LineWidth',5);hold on;
+plot(samples,random_points,'g+-','LineWidth',5);hold on;
+plot(samples,incr_bal_point1,'kd','LineWidth',5);hold on;
+plot(samples,incr_bal_point3,'cs','LineWidth',5);hold on;
+plot(samples,incr_bal_point4,'mo','LineWidth',5);hold on;
 legendInfo{1} = ['random'];
 legendInfo{2} = ['incremental'];
+xlabel('#selected samples','FontSize',20)
+ylabel('AUC','FontSize',20)
 legend(legendInfo);
-%ylim([0 1]);
+ylim([0 1]);
+%set(gca,'yscale','log')
+set(gca,'FontSize',20)
+
+b = get(gca,'Children');
+h=[b];
+lgd = legend(h,'incr @T3','incr @T2','incr @T1','random')
+lgd.FontSize = 30;
+lgd.Location = 'southeast';
 % avg_runtimes_inct
 % avg_runtimes_batch
 % fig = figure('visible', 'off');

@@ -58,7 +58,20 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             train_fea_class_incremental=[train_fea_class_incremental;new_classes];
             new_points=[];
             new_classes=[];
+            old_sample=current_sample;
+            old_labels=current_labels;
+            old_kernel=kernel;
+            old_dists=current_Dists;
             [current_sample,current_labels,ranking,kernel,current_Dists]=update_model(options,model_size,ranking,values,train_fea_incremental,train_fea_class_incremental,new_points,new_classes,current_Dists,data_limit,warping,batch);
+            area=run_inference(kernel,current_sample,current_labels,options.test,options.test_class,options); 
+            if area<current_area
+               current_sample=old_sample;
+               current_labels=old_labels;
+               current_kernel=old_kernel;
+               current_Dists=old_dists;       
+            else
+                current_area=area;
+            end
         case 'incr'
             %fprintf('Train size %d\n',size(train_fea_incremental,1))
             %fprintf('New points %d\n',size(new_points,1))
@@ -71,7 +84,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             if area<current_area
                current_sample=old_sample;
                current_labels=old_labels;
-               current_kernel=old_kernel;
+               kernel=old_kernel;
                current_Dists=old_dists;       
             else
                 current_area=area;
@@ -90,7 +103,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             if area<current_area
                current_sample=old_sample;
                current_labels=old_labels;
-               current_kernel=old_kernel;
+               kernel=old_kernel;
                current_Dists=old_dists;       
             else
                 current_area=area;
@@ -122,7 +135,7 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
             if area<current_area
                current_sample=old_sample;
                current_labels=old_labels;
-               current_kernel=old_kernel;
+               kernel=old_kernel;
                current_Dists=old_dists;       
             else
                 current_area=area;
@@ -151,9 +164,17 @@ for j=0:batch:(size(train_fea,1)-model_size-batch)
                     crit_old = crit;
                end    
             end
+            old_sample=current_sample;
+            old_labels=current_labels;
             current_sample=Xs;
             current_labels=Ys;
-            area=run_inference_lssvm(selected_points(s),train_fea,train_fea,current_labels,options.test,options.test_class,options);
+            area=run_inference_lssvm(current_sample,train_fea,train_class,current_labels,options.test,options.test_class,options);
+            if area<current_area
+               current_sample=old_sample;
+               current_labels=old_labels;  
+            else
+                current_area=area;
+            end
     % report selected points 
     end
     if point<=length(model_observation_points) && model_size+j<=model_observation_points(point)
