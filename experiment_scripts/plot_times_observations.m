@@ -64,8 +64,8 @@ saveas(fig,sprintf('/Users/irma/Documents/MATLAB/runtimes_vs_observations.jpg'))
 
 
 [y1i,y1b,y1l,e1i,e1b,e1l,x]=get_processing_times_observations('/Users/irma/Documents/MATLAB/RESULTS/Incremental_May/Incremental/UCI_Adult/Balanced_Version1/smp_20/bs_100/Supervised/HeatKernel/k_0/');
-[y2i,e2i,y2b,e2b,y2l,e2l]=get_processing_times_observations('/Users/irma/Documents/MATLAB/RESULTS/Incremental_May/Incremental/RCV/RT/');
-[y3i,e3i,y3b,e3b,y3l,e3l]=get_processing_times_observations('/Users/irma/Documents/MATLAB/RESULTS/Incremental_May/Incremental/USPS/RT/')
+[y2i,e2i,y2b,e2b,y2l,e2l]=get_processing_times_observations('/Users/irma/Documents/MATLAB/RESULTS/Incremental_May/Incremental/RCV/Balanced_Modified/Balanced_Modified/smp_5/bs_100/Supervised/HeatKernel/k_0/');
+[y3i,e3i,y3b,e3b,y3l,e3l]=get_processing_times_observations('/Users/irma/Documents/MATLAB/RESULTS/Incremental_May/Incremental/USPS/Balanced_Modified/Balanced_Modified/smp_20/bs_100/Supervised/HeatKernel/k_0/')
 fig=figure(2)
 
 subplot(1,3,1)
@@ -234,8 +234,13 @@ if exist(path_to_batch, 'file') == 2
     aucs_inct=load(path_to_batch,'results');
     results=aucs_inct.results;
     for i=1:length(results)
+       try
        times_batch(i,:)=results{i}.processing_times;
        samples=results{i}.report_points;
+       catch
+       times_batch(i,:)=NaN;  
+       end
+       
     end
 end
 
@@ -250,10 +255,16 @@ end
 
 mean_time_incr=mean(times_incr);
 mean_time_batch=mean(times_batch);
+try
 mean_time_lssvm=mean(times_lssvm);
+stdev_time_lssvm=std(times_lssvm);
+catch
+mean_time_lssvm=ones(1,size(mean_time_incr,1))*NaN;
+stdev_time_lssvm=ones(1,size(mean_time_incr,1))*NaN;
+end
 stdev_time_inct=std(times_incr);
 stdev_time_batch=std(times_batch);
-stdev_time_lssvm=std(times_lssvm);
+
 
 % fig=figure
 % errorbar(samples,mean_time_incr,stdev_time_inct,'g-','LineWidth',5);hold on;

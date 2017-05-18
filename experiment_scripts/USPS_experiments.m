@@ -129,13 +129,15 @@ for i=1:nr_runs
   avg_aucs=avg_aucs+results{i}.aucs;
   all_aucs(i,:)=results{i}.aucs;
   run_times(i,:)=results{i}.runtime+results{i}.tuning_time;
+  processing_times(i,:)=results{i}.lists_of_processing_times;
+  selection_times(i,:)=results{i}.list_of_selected_times;
 end
 stdev=std(all_aucs);
 avg_aucs=avg_aucs/nr_runs;
 avg_runtime=mean(run_times);
 std_runtime=std(run_times);
 %avg_aucs_lssvm=avg_aucs_lssvm/nr_runs;
-save(sprintf('%s/auc.mat',output_path),'avg_aucs','stdev','report_points','avg_runtime','std_runtime');
+save(sprintf('%s/auc.mat',output_path),'avg_aucs','stdev','report_points','avg_runtime','std_runtime','processing_times','selection_times');
 save(sprintf('%s/results.mat',output_path),'results');
 %plot the result
 plot_results(general_output)
