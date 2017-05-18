@@ -48,6 +48,8 @@ for r=1:nr_runs
     res.stdev_tuning_time=std(tuning_time);
     res.runtime=mean(runtime);
     res.stdev_runtime=std(runtime);
+    res.selection_time=mean(selection_time);
+    res.processing_time=mean(processing_time);
     avg_runtime=mean(runtime);
     std_runtime=std(runtime);
     save(sprintf('%s/auc.mat',output_path),'avg_aucs','stdev','report_points','avg_runtime','std_runtime');
@@ -61,8 +63,8 @@ for i=1:nr_runs
   avg_aucs=avg_aucs+results{i}.aucs;
   all_aucs(i,:)=results{i}.aucs;
   run_times(i,:)=results{i}.runtime+results{i}.tuning_time;
-  processing_times(i,:)=results{i}.lists_of_processing_times;
-  selection_times(i,:)=results{i}.list_of_selected_times;
+  processing_times(i,:)=results{i}.processing_time;
+  selection_times(i,:)=results{i}.selection_time;
 end
 stdev=std(all_aucs);
 avg_aucs=avg_aucs/nr_runs;

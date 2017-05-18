@@ -141,7 +141,7 @@ end
 
 
 
-function [mean_time_incr,mean_time_batch,mean_time_lssvm,stdev_time_inct,stdev_time_batch,stdev_time_lssvm,samples]=get_times_observations(path_to_results,title)
+function [mean_time_incr,mean_time_batch,mean_time_lssvm,stdev_time_inct,stdev_time_batch,stdev_time_lssvm,samples]=get_times_observations(path_to_results,title,dataset)
 report_points=[];
 times_incr=[];
 times_batch=[];
@@ -150,20 +150,31 @@ path_to_incr=sprintf('%s/incr/results.mat',path_to_results);
 path_to_batch=sprintf('%s/batch/results.mat',path_to_results);
 path_to_lssvm=sprintf('%s/lssvm/results.mat',path_to_results)
 
+path_to_incr1=sprintf('%s/incr/auc.mat',path_to_results);
+path_to_batch1=sprintf('%s/batch/auc.mat',path_to_results);
+path_to_lssvm1=sprintf('%s/lssvm/auc.mat',path_to_results)
+
 
 counter=1;
 
 if exist(path_to_incr, 'file') == 2
-    aucs_inct=load(path_to_incr,'results');
-    results=aucs_inct.results;
-    for i=1:length(results)
+    if strcmp(dataset,'USPS') || strcmp(dataset,'RCV')
+      aucs_inct=load(path_to_incr1,'auc');
+      results=aucs_inct.selection_times;
+      times_incr(1,:)=results;
+    end
+else
+      aucs_inct=load(path_to_incr,'results');
+      results=aucs_inct.results;
+      for i=1:length(results)
        times_incr(i,:)=results{i}.selection_times;
        samples=results{i}.report_points;
-    end
+      end 
 end
 
 if exist(path_to_batch, 'file') == 2
     aucs_inct=load(path_to_batch,'results');
+    
     results=aucs_inct.results;
     for i=1:length(results)
        times_batch(i,:)=results{i}.selection_times;

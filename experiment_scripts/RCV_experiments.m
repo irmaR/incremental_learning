@@ -108,6 +108,11 @@ for ns=1:length(NeighborModes)
            selected_points{c}=res1.selected_points;
            best_options{c}=res1.best_options;
            tuning_time(c,:)=res1.tuning_time;
+           res1
+           
+           selection_time(c,:)=res1.selection_times;
+           processing_time(c,:)=res1.processing_times;
+           
            runtime(c,:)=res1.runtime;
         end
         res.selected_labels=selected_labels;
@@ -118,6 +123,10 @@ for ns=1:length(NeighborModes)
         avg_aucs=res.aucs;
         stdev=res.stdev_aucs;
         res.tuning_time=mean(tuning_time);
+        
+        res.selection_time=mean(selection_time);
+        res.processing_time=mean(processing_time);
+        
         res.stdev_tuning_time=std(tuning_time);
         res.runtime=mean(runtime);
         res.stdev_runtime=std(runtime);
@@ -135,8 +144,8 @@ for ns=1:length(NeighborModes)
       avg_aucs=avg_aucs+results{i}.aucs;
       all_aucs(i,:)=results{i}.aucs;
       run_times(i,:)=results{i}.runtime+results{i}.tuning_time;
-      processing_times(i,:)=results{i}.lists_of_processing_times;
-      selection_times(i,:)=results{i}.list_of_selected_times;
+      processing_times(i,:)=results{i}.processing_time;
+      selection_times(i,:)=results{i}.selection_time;
     end
     stdev=std(all_aucs);
     avg_aucs=avg_aucs/nr_runs;
