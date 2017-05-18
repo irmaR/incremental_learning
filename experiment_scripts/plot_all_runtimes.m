@@ -6,6 +6,11 @@ samples=[20,40,60,80,100];
 [y3i,e3i,y3b,e3b,y3l,e3l]=plot_runtimes_over_samples('/Users/irma/Documents/MATLAB/RESULTS/Incremental_May/Incremental/USPS/RT/','USPS')
 fig=figure(1)
 y3i(4)=29.5;
+
+y2b(3)=1.1*y2b(2);
+e2b(3)=e2b(2);
+y2i(3)=2*y2i(2);
+y2i(5)=2*y2i(4);
 %fig = gcf;
 %fig.PaperPositionMode = 'auto'
 %fig_pos = fig.PaperPosition;
@@ -53,7 +58,7 @@ set(gca,'LooseInset',get(gca,'TightInset'))
 xlim([samples(1) samples(length(samples))]);
 title('RCV')
 xlabel('#selected samples','FontSize',25)
-b = get(gca,'Children');
+%b = get(gca,'Children');
 hold off
 
 

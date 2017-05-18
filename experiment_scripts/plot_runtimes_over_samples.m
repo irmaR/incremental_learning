@@ -1,5 +1,5 @@
 function [avg_runtimes_inct,std_runtimes_inct,avg_runtimes_batch,std_runtimes_batch,avg_runtimes_lssvm,std_runtimes_lssvm]=plot_runtimes_over_samples(path_to_results,title_text)
-samples=[5,10,20,40,60,80,100];
+samples=[20,40,60,80,100];
 bs=100;
 avg_runtimes_inct=[];
 std_runtimes_inct=[];

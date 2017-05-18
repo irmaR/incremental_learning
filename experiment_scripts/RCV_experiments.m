@@ -108,7 +108,6 @@ for ns=1:length(NeighborModes)
            selected_points{c}=res1.selected_points;
            best_options{c}=res1.best_options;
            tuning_time(c,:)=res1.tuning_time;
-           res1
            
            selection_time(c,:)=res1.selection_times;
            processing_time(c,:)=res1.processing_times;

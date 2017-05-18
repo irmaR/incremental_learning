@@ -107,6 +107,8 @@ for r=1:nr_runs
        aucs(c,:)=res1.aucs;
        tuning_time(c,:)=res1.tuning_time;
        runtime(c,:)=res1.runtime;
+       selection_time(c,:)=res1.selection_times;
+       processing_time(c,:)=res1.processing_times;
     end
     res.aucs=mean(aucs);
     avg_aucs=mean(aucs);
